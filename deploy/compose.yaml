@@ -1,0 +1,66 @@
+name: zealot
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${ZEALOT_POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: zealot
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d zealot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  zealot:
+    image: appdock:local
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      RAILS_ENV: production
+      ZEALOT_POSTGRES_HOST: postgres
+      ZEALOT_POSTGRES_PORT: 5432
+      ZEALOT_POSTGRES_USERNAME: postgres
+      ZEALOT_POSTGRES_DB_NAME: zealot
+      ZEALOT_DOMAIN: ${ZEALOT_DOMAIN:?set in .env}
+      ZEALOT_TRUSTED_LAN: "true"
+      ZEALOT_SKIP_SAMPLE_DATE: "true"
+      ZEALOT_GUEST_MODE: "false"
+      ZEALOT_REGISTER_ENABLED: "false"
+      ZEALOT_LOGIN_ENABLED: "true"
+      ZEALOT_PASSWORDLESS_LOGIN_ENABLED: "false"
+      ZEALOT_SENTRY_DISABLE: "true"
+    volumes:
+      - ./data/uploads:/app/public/uploads
+      - ./data/backup:/app/public/backup
+      - ./data/log:/app/log
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider --proxy=off 127.0.0.1/api/health || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 12
+      start_period: 90s
+
+  web:
+    image: caddy:2.11.9
+    environment:
+      ZEALOT_DOMAIN: ${ZEALOT_DOMAIN:?set in .env}
+    restart: unless-stopped
+    depends_on:
+      zealot:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./data/caddy:/data

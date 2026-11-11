@@ -1,0 +1,19 @@
+.card.mb-3
+  .card-header
+    h3.card-title
+      i.icon.fa-solid.fa-qrcode
+      = t('releases.show.qrcode')
+    .card-tools
+      button.btn.btn-tool data-lte-toggle="card-collapse"
+        i.fa-solid.fa-plus data-lte-icon="expand"
+        i.fa-solid.fa-minus data-lte-icon="collapse"
+  .card-body.text-center.p-0
+    .qr_code
+      = app_qrcode_tag(@release)
+  .card-footer
+    .text-center.mb-2 = t('releases.show.scan_qrcode_with_any_suppprted_app')
+    label.form-label.small for="release-share-link" = t('releases.show.share_link')
+    .input-group data-controller="clipboard-center"
+      input#release-share-link.form-control type="text" readonly=true value="#{@release.release_url}" data-clipboard-center-target="source"
+      button.btn.btn-primary type="button" data-action="clipboard-center#copy" data-clipboard-text="#{@release.release_url}" aria-label="#{t('releases.show.copy_share_link')}"
+        i.fa-regular.fa-clipboard

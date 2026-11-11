@@ -1,0 +1,6 @@
+interface:
+  display_name: "团队测试包分发"
+  short_description: "为业务 App 配置测试包构建与内网上传，返回下载页、二维码和应用链接"
+  default_prompt: "使用 $team-distribution 按当前工程配置构建并上传测试包，返回实际下载页和二维码。"
+policy:
+  allow_implicit_invocation: true

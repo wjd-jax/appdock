@@ -1,0 +1,20 @@
+<% content_for :title, '上传通知' %>
+<style>.notification-toggle{display:flex!important;align-items:center;gap:10px;margin:18px 0}.notification-toggle input[type=checkbox]{width:18px;height:18px;min-height:0;margin:0;display:inline-block;accent-color:#35b3a7}</style>
+<div class="hero workspace-hero"><div><span class="eyebrow">LARK NOTIFICATIONS</span><h1>上传新版本，通知测试团队。</h1><p class="lead">连接 Lark / 飞书群机器人，自动发送应用、平台、版本、更新说明与下载链接。</p></div><span class="badge"><%= @config['enabled'] ? '自动通知已开启' : '自动通知已关闭' %></span></div>
+<section class="card">
+<h2>Lark 群机器人</h2>
+<p class="muted">适用于所有应用，包括今后首次上传的新应用。网页与 CI 上传成功后异步发送；重复包被拦截时不发送，通知失败不影响上传。</p>
+<%= form_with url: distribution_notifications_path, method: :patch, local: true, html: {autocomplete: 'off'} do %>
+<label class="notification-toggle"><%= check_box_tag :enabled, '1', @config['enabled'] %> 开启上传自动通知</label>
+<label>Webhook 地址 <input type="password" name="webhook_url" autocomplete="new-password" placeholder="<%= @configured ? '已保存；留空保留，输入新地址可替换' : 'https://open.larksuite.com/open-apis/bot/v2/hook/…' %>"></label>
+<p class="hint">在目标群设置中添加「自定义机器人」，复制 Webhook 地址。支持 Lark 与飞书官方地址；凭据加密保存，不回显。</p>
+<label>签名密钥（可选）<input type="password" name="signing_secret" autocomplete="new-password" placeholder="<%= @signed ? '已保存；留空保留' : '机器人启用签名校验时填写' %>"></label>
+<% if @signed %><label class="notification-toggle"><%= check_box_tag :clear_secret, '1' %> 清除已保存的签名密钥</label><% end %>
+<p class="hint">如果机器人设置了关键词，请允许「AppDock」；IP 白名单需放行服务器出口 IP。</p>
+<button class="button" type="submit">保存配置</button>
+<% end %>
+</section>
+<section class="card"><h2>测试与发送结果</h2><p>先保存配置，再发送测试消息。自动通知关闭时也可手动测试；测试会向已保存的目标群发送一条消息。</p>
+<% if @configured %><%= button_to '发送测试消息到 Lark 群', distribution_test_notification_path, class: 'button secondary' %><% else %><p class="muted">保存 Webhook 地址后即可测试。</p><% end %>
+<% if @status.present? %><p role="status"><%= @status['ok'] ? '成功' : '失败' %> · <%= @status['message'] %></p><p class="muted"><%= @status['at'] %></p><% else %><p class="muted">暂无发送记录</p><% end %>
+<p class="hint">下载链接仅在可访问 Sunny 的公司内网使用。失败不会自动重发，可修正配置后手动测试。</p></section>

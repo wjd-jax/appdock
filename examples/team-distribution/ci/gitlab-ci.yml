@@ -1,0 +1,7 @@
+internal_test_build:
+  stage: build
+  tags: [company-lan]
+  when: manual
+  # Runner 必须能直连 Sunny。可信内网模式不需要上传 Token。
+  script:
+    - python3 tools/team_release.py release

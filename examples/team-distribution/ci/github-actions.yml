@@ -1,0 +1,10 @@
+name: Internal test build
+on: workflow_dispatch
+jobs:
+  distribute:
+    # Runner must be inside the company LAN. Do not use a public hosted runner.
+    runs-on: [self-hosted, macOS]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7; runner >= 2.327.1
+      - name: Build and upload
+        run: python3 tools/team_release.py release

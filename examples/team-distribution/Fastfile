@@ -1,0 +1,11 @@
+# Template: create this lane in your App repository's existing fastlane/Fastfile.
+# Configure the actual workspace, scheme and signing in that repository.
+lane :build_test do
+  build_app(
+    workspace: ENV.fetch('IOS_WORKSPACE'),
+    scheme: ENV.fetch('IOS_SCHEME'),
+    export_method: 'ad-hoc',
+    output_directory: 'build',
+    output_name: 'team-test.ipa'
+  )
+end
