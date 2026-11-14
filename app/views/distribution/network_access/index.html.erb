@@ -1,0 +1,10 @@
+<% content_for :title, '访问设置' %>
+<style>.access-toggle{display:flex!important;align-items:center;gap:10px;margin:20px 0}.access-toggle input{width:20px!important;height:20px;min-height:0;margin:0;accent-color:#35b3a7}</style>
+<div class="hero workspace-hero"><div><span class="eyebrow">NETWORK ACCESS</span><h1>控制内外网访问。</h1><p class="lead">内网始终可用，按需向外网开放应用下载。</p></div><span class="badge"><%= @live ? '外网已开放' : (@enabled ? '外网尚未开放' : '仅内网') %></span></div>
+<section class="card"><h2>允许外网访问</h2><p>开启后，外网访客可浏览全部应用的下载页、版本详情、二维码并下载安装包。上传、应用管理、上传通知、开发接入和设备信息获取仍仅限内网。</p>
+<%= form_with url: distribution_network_access_path, method: :patch, local: true do %>
+<label class="access-toggle"><%= check_box_tag :enabled, '1', @enabled %> 允许外网访问下载</label><button type="submit" class="button">保存访问设置</button><% end %>
+<p class="hint">关闭后立即拒绝新的外网请求，并停止公网隧道；已经开始的文件传输可能继续。安装包无需登录即可下载，链接请仅分享给测试人员。</p></section>
+<section class="card"><h2>实际运行状态</h2><p role="status"><%= @live ? '外网已开放' : (@enabled ? (@status['state'] == 'error' ? '开启失败' : '正在开启或等待服务恢复') : '仅内网，外网下载已关闭') %></p><p class="muted"><%= @status['message'] %></p><p class="hint">状态时间：<%= @status['at'].presence || '尚无控制器状态' %>。本页每 5 秒自动检查状态，填写表单时暂停刷新。</p>
+<% if @live %><p>外网下载首页：<a href="https://<%= @public_host %>/" target="_blank" rel="noopener">https://<%= @public_host %>/</a></p><% @apps.each do |app| %><p><%= app.name %>：<a href="https://<%= @public_host %>/a/<%= app.id %>" target="_blank" rel="noopener">https://<%= @public_host %>/a/<%= app.id %></a></p><% end %><% else %><p class="muted">外网下载入口关闭时不可使用，内网地址继续可用。</p><% end %></section>
+<script>let edited=false;document.querySelector('form').addEventListener('change',()=>edited=true);setTimeout(()=>{if(!edited&&!document.hidden)location.reload()},5000)</script>

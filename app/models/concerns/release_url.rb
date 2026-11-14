@@ -27,6 +27,7 @@ module ReleaseUrl
   end
 
   def distribution_share_options
-    DistributionAccess.trusted_lan? ? {} : {share: share_token}
+    options = DistributionAccess.trusted_lan? ? {} : {share: share_token}
+    options.merge(Distribution::PublicContext.url_options)
   end
 end

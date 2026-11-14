@@ -18,6 +18,10 @@ module AppsHelper
   end
 
   def app_icon(release, options = {})
+    if Distribution::PublicContext.external
+      src = release&.icon&.file&.exists? ? distribution_public_icon_path(release) : '/distribution/appdock-logo.svg'
+      return image_tag(src, **options)
+    end
     unless release&.icon && release.icon.file && release.icon.file.exists?
       return image_tag('zealot-icon.png', **options)
     end
@@ -39,7 +43,7 @@ module AppsHelper
   end
 
   def logged_in_or_without_auth?(release)
-    DistributionAccess.trusted_lan? || user_signed_in? || matched_password?(release)
+    (!Distribution::PublicContext.external && DistributionAccess.trusted_lan?) || user_signed_in? || matched_password?(release)
   end
 
   def matched_password?(release)

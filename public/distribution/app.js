@@ -10,6 +10,21 @@
   const ua=navigator.userAgent; const platform=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1)?'iOS':/Android/.test(ua)?'Android':null;
   document.querySelectorAll('.udid-page').forEach(el=>el.dataset.device=platform==='iOS'?'ios':'other');
   document.querySelectorAll('[data-platform-card]').forEach(card=>card.classList.toggle('preferred',card.dataset.platformCard===platform));
+  const appDownload=document.querySelector('.app-download');
+  if(appDownload && platform){
+    const cards=[...appDownload.querySelectorAll('[data-platform-card]')];
+    cards.forEach(card=>card.hidden=card.dataset.platformCard!==platform);
+    appDownload.classList.add('platform-filtered');
+    const history=[...appDownload.querySelectorAll('[data-history-platform]')];
+    history.forEach(row=>row.hidden=row.dataset.historyPlatform!==platform);
+    const historySection=appDownload.querySelector('[data-platform-history]');
+    if(historySection)historySection.hidden=!history.some(row=>!row.hidden);
+    const unavailable=appDownload.querySelector('[data-platform-unavailable]');
+    if(unavailable && cards.length && !cards.some(card=>!card.hidden)){
+      unavailable.textContent=`此应用暂时没有 ${platform} 安装包。`;
+      unavailable.hidden=false;
+    }
+  }
   document.querySelectorAll('[data-device-hint]').forEach(el=>{if(platform && platform!==el.dataset.deviceHint)el.textContent=`当前设备是 ${platform}，这个安装包适用于 ${el.dataset.deviceHint}。请确认选择正确平台。`;if(/MicroMessenger|DingTalk/.test(ua))el.textContent='请通过右上角菜单，在系统浏览器中打开此页后安装。';});
   document.querySelector('#app-search')?.addEventListener('input',event=>{const query=event.target.value.toLowerCase().trim();document.querySelectorAll('[data-app-name]').forEach(card=>card.hidden=!card.dataset.appName.includes(query));});
   const form=document.querySelector('#upload-form'); if(!form)return;

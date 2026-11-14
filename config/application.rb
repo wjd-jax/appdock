@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'boot'
+require_relative '../lib/appdock_public_gateway'
 
 require 'rails'
 # Pick the frameworks you want:
@@ -25,6 +26,7 @@ module Zealot
 
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
+    config.middleware.insert_before 0, AppdockPublicGateway
 
     # Set default timezone
     config.time_zone = ENV['TIME_ZONE'] || 'Asia/Shanghai'

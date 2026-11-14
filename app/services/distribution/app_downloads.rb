@@ -14,7 +14,7 @@ module Distribution
     end
 
     def url
-      Rails.application.routes.url_helpers.distribution_app_url(@app, **Setting.url_options)
+      Rails.application.routes.url_helpers.distribution_app_url(@app, **Setting.url_options.merge(PublicContext.url_options))
     end
   end
 end

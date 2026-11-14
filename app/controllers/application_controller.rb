@@ -6,6 +6,10 @@ class ApplicationController < ActionController::Base
   include UserRole
   include Customize
 
+  prepend_around_action do |controller, action|
+    Distribution::PublicContext.set(external: request.env['appdock.public'] == true, &action)
+  end
+
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
@@ -23,6 +27,7 @@ class ApplicationController < ActionController::Base
   end
 
   def current_user
+    return nil if Distribution::PublicContext.external
     if trusted_lan? && !devise_controller? && !controller_path.start_with?('admin/')
       @distribution_operator ||= DistributionAccess.operator
     else

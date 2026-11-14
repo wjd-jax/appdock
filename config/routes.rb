@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  get '/access', to: 'distribution/network_access#index', as: :distribution_network_access
+  patch '/access', to: 'distribution/network_access#update'
+  get '/catalog', to: 'distribution/catalog#index'
+  get '/public/icons/:id', to: 'distribution/catalog#icon', as: :distribution_public_icon
   root to: 'distribution/workspace#landing'
   get '/udid', to: 'distribution/udids#index', as: :distribution_udid
   get '/udid/qrcode', to: 'distribution/udids#qrcode', as: :distribution_udid_qrcode

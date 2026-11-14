@@ -1,0 +1,38 @@
+<% content_for :title, '应用下载' %>
+<div class="catalog-page">
+  <section class="catalog-heading" aria-labelledby="catalog-title">
+    <div><h1 id="catalog-title">应用下载</h1><p>找到你的应用，获取最新测试版本。</p></div>
+    <span class="catalog-count"><%= @apps.size %> 个应用</span>
+  </section>
+  <div class="catalog-list">
+    <% @apps.each do |app| %>
+      <% latest = @downloads.fetch(app.id); updated_at = latest.map(&:created_at).compact.max %>
+      <article class="catalog-app" aria-labelledby="catalog-app-<%= app.id %>">
+        <div class="catalog-identity">
+          <div class="catalog-icon"><%= app_icon(latest.first, alt: "#{app.name} 图标") %></div>
+          <div class="catalog-app-name"><h2 id="catalog-app-<%= app.id %>"><%= app.name %></h2>
+            <p><%= latest.empty? ? '测试版本准备中' : latest.map { |r| distribution_platform(r) }.join(' / ') + ' 测试版' %></p>
+          </div>
+        </div>
+        <div class="catalog-versions">
+          <% latest.each do |release| %>
+            <div class="catalog-platform">
+              <span class="catalog-platform-name"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 5h4m-3 14h2"/></svg><%= distribution_platform(release) %></span>
+              <strong><%= release.release_version.presence || release.version %></strong>
+              <span class="catalog-build">Build <%= release.build_version.presence || '—' %></span>
+              <span class="catalog-size"><%= number_to_human_size(release.size || 0) %></span>
+            </div>
+          <% end %>
+          <% if latest.empty? %><p class="catalog-unavailable">暂时没有可用安装包，请稍后再来。</p><% end %>
+        </div>
+        <div class="catalog-action">
+          <div class="catalog-update"><span class="catalog-status-dot" aria-hidden="true"></span><%= updated_at ? "更新于 #{distribution_time(updated_at)}" : '暂无版本更新' %></div>
+          <%= link_to distribution_app_path(app), class: 'button catalog-download' do %><%= latest.empty? ? '查看应用' : '查看并下载' %><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg><% end %>
+        </div>
+        <% if latest.any? %><div class="catalog-scan"><img src="<%= distribution_app_qrcode_path(app, size: 'large') %>" alt="<%= app.name %> 下载二维码" width="92" height="92" loading="lazy"><span>手机扫码下载</span></div><% end %>
+      </article>
+    <% end %>
+  </div>
+  <% if @apps.empty? %><section class="catalog-empty"><img src="/distribution/appdock-logo.svg" width="52" height="52" alt=""><h2>应用即将到来</h2><p>暂时没有可下载的应用，请稍后再来。</p></section><% end %>
+  <p class="catalog-help">请在对应设备上打开下载页，并选择适合当前设备的安装包。</p>
+</div>
