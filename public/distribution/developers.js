@@ -4,6 +4,7 @@
   const form = document.querySelector('#setup-form');
   const field = name => form.elements.namedItem(name);
   const config = document.querySelector('#config-output'), ci = document.querySelector('#ci-output'), status = document.querySelector('#setup-status');
+  const buildEditor = document.querySelector('#build-editor'), buildSummary = document.querySelector('#build-summary'), editBuild = document.querySelector('#edit-build');
   const kitButton = document.querySelector('#download-kit'), configButton = document.querySelector('#download-config'), ciButton = document.querySelector('#download-ci');
   let files = null, provider = 'github', pending = null, timer, version = 0, downloading = false;
   const fileForCI = () => provider === 'github' ? '.github/workflows/team-distribution.yml' : 'ci/team-distribution.gitlab.yml';
@@ -30,7 +31,7 @@
       if (!response.headers.get('Content-Type')?.includes('application/json')) throw new Error('服务暂时未返回配置，请检查网络后重试。');
       const body=await response.json(); if (!response.ok) throw new Error(body.error || '无法生成配置');
       if(current!==version)return;
-      files=body.files;config.textContent=files['.team-distribution.json'];renderCI();status.textContent='配置已生成。核对构建命令与产物路径后即可下载。';
+      files=body.files;config.textContent=files['.team-distribution.json'];renderCI();status.textContent='';
     } catch(error) {
       if(error.name==='AbortError'||current!==version)return;
       status.className='error';status.textContent=error.message;config.textContent='修正上方配置后重新生成。';renderCI();
@@ -44,11 +45,16 @@
   const setPreset = () => {
     const value=field('platform').value,preset=data.presets[value];
     field('build').value=JSON.stringify(preset.build);field('artifact').value=preset.artifact;
+    buildSummary.textContent=preset.build.join(' ');
+    buildEditor.hidden=value!=='custom';editBuild.setAttribute('aria-expanded',String(!buildEditor.hidden));
+    if(value==='custom')document.querySelector('#project').open=true;
     field('runner').value=value==='ios'?'macOS':'Linux';field('runner').disabled=value==='ios';
     document.querySelector('#upload-command').textContent=`python3 tools/team_release.py upload /绝对路径/app.${value==='ios'?'ipa':'apk'}`;
     schedule();
   };
   field('platform').addEventListener('change',setPreset);
+  editBuild.addEventListener('click',()=>{buildEditor.hidden=!buildEditor.hidden;editBuild.setAttribute('aria-expanded',String(!buildEditor.hidden));if(!buildEditor.hidden)field('build').focus();});
+  field('build').addEventListener('input',()=>{try{const command=JSON.parse(field('build').value);buildSummary.textContent=Array.isArray(command)?command.join(' '):'请填写有效的命令数组';}catch{buildSummary.textContent='请填写有效的命令数组';}});
   ['build','artifact','branch'].forEach(name=>field(name).addEventListener('input',schedule));
   ['trigger','runner'].forEach(name=>field(name).addEventListener('change',schedule));
   form.addEventListener('submit',event=>event.preventDefault());
@@ -59,8 +65,15 @@
   ciButton.addEventListener('click',()=>{if(files)save(new Blob([files[fileForCI()]],{type:'text/yaml'}),provider==='github'?'team-distribution.yml':'team-distribution.gitlab.yml');});
   kitButton.addEventListener('click',async()=>{
     if(!files||downloading)return;downloading=true;enable();
-    try{const response=await fetch(root.dataset.bundleUrl,{method:'POST',headers:headers(),body:JSON.stringify(payload())});if(!response.ok){const body=await response.json();throw new Error(body.error||'接入包生成失败');}if(!response.headers.get('Content-Type')?.includes('application/zip'))throw new Error('服务返回的接入包格式异常');save(await response.blob(),'team-distribution-kit.zip');toast('接入包已下载，请核对后合并到业务工程。');}catch(error){toast(error.message);}finally{downloading=false;enable();}
+    try{const response=await fetch(root.dataset.bundleUrl,{method:'POST',headers:headers(),body:JSON.stringify(payload())});if(!response.ok){const body=await response.json();throw new Error(body.error||'接入包生成失败');}if(!response.headers.get('Content-Type')?.includes('application/zip'))throw new Error('服务返回的接入包格式异常');save(await response.blob(),'team-distribution-kit.zip');toast('接入包已下载，可以把下方指令发给 AI。');}catch(error){toast(error.message);}finally{downloading=false;enable();}
   });
-  document.querySelectorAll('[data-setup-copy]').forEach(button=>button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(document.getElementById(button.dataset.setupCopy).textContent);toast('已复制');}catch{toast('复制失败，请手动选择内容复制');}}));
+  document.querySelectorAll('[data-setup-copy]').forEach(button=>button.addEventListener('click',async()=>{
+    const value=document.getElementById(button.dataset.setupCopy).textContent;
+    try{await navigator.clipboard.writeText(value);toast('已复制');}
+    catch{
+      const input=document.createElement('textarea');input.value=value;input.setAttribute('readonly','');input.style.position='fixed';input.style.left='-9999px';document.body.append(input);input.select();
+      let copied=false;try{copied=document.execCommand('copy');}catch{}input.remove();toast(copied?'已复制':'复制失败，请手动选择内容复制');
+    }
+  }));
   renderCI();setPreset();
 })();

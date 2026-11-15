@@ -23,7 +23,7 @@ session = DeveloperSetupSession.new(Rails.application)
 session.host! 'apps.example.com:18443'
 session.https!
 session.get '/developers'
-check('anonymous setup page includes channel context and interactive controls') { session.response.status == 200 && session.response.body.include?('下载当前项目接入包') && session.response.body.include?('setup-form') && !session.response.body.include?('开发者登录') }
+check('anonymous setup page leads with AI handoff and interactive controls') { session.response.status == 200 && session.response.body.include?('交给 AI 完成接入') && session.response.body.include?('复制给 AI') && session.response.body.include?('setup-form') && !session.response.body.include?('开发者登录') }
 csrf = Nokogiri::HTML(session.response.body).at_css('meta[name="csrf-token"]')['content']
 headers = {'X-CSRF-Token' => csrf, 'ACCEPT' => 'application/json'}
 base = { platform: 'android', trigger: 'manual', branch: 'develop', runner: 'Linux'}
