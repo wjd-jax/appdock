@@ -12,7 +12,6 @@
       </div>
       <div class="download-qr">
         <img class="qr" src="<%= (@package_view ? Distribution::AppDownloads.new(@app).package_qrcode_path(@latest.first, size: 'large') : Distribution::AppDownloads.new(@app).qrcode_path(size: 'large')) %>" alt="应用下载二维码">
-        <span class="qr-caption">手机扫码打开</span>
       </div>
     </header>
 <% if @latest.empty? %><div class="card empty"><h2>暂时没有可用安装包</h2><p>请开发同事上传此应用的 IPA 或 APK。</p></div><% end %>

@@ -72,4 +72,4 @@ body:has(.catalog-page)>.footer{border-color:#e5ebe8;color:#7d8d86;background:tr
 .fir-package-actions button{color:var(--brand);font-size:12px;padding:5px 0;line-height:1.5}
 @media(max-width:600px){.fir-product-card{grid-column:span 1;padding:24px}.fir-product-head{gap:15px}.fir-product-card .fir-product-head .app-icon img{width:68px;height:68px}.fir-platform-list{grid-template-columns:1fr;gap:12px;margin:22px 0}.fir-package{padding:18px}}
 
-.fir-package-head .environment-tag{font-size:10px;margin-left:8px}.fir-package-head{flex-wrap:wrap}
+.fir-package-meta .environment-tag{margin-left:8px;vertical-align:middle}

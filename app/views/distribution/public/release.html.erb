@@ -11,7 +11,7 @@
           <p class="release-platform"><%= distribution_platform(@release) %><span class="environment-tag" data-business-environment="<%= @release.business_environment_key %>"><%= @release.business_environment_label %></span></p>
         </div>
       </div>
-      <div class="release-qr"><img class="qr" src="<%= @release.qrcode_url(:large) %>" alt="此版本下载二维码"><span>手机扫码打开</span></div>
+      <div class="release-qr"><img class="qr" src="<%= @release.qrcode_url(:large) %>" alt="此版本下载二维码"></div>
     </header>
 
     <div class="release-body">

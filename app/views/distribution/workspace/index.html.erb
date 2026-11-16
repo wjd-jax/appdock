@@ -33,11 +33,10 @@
               <div class="fir-package">
                 <div class="fir-package-head">
                   <h3><%= platform %></h3>
-                  <span class="environment-tag" data-business-environment="<%= release.business_environment_key %>"><%= release.business_environment_label %></span>
                   <a href="<%= distribution_manage_package_path(app, release.platform, release.bundle_id) %>">编辑</a>
                 </div>
                 <p class="fir-package-id" title="<%= release.bundle_id %>"><span>包名：</span><%= release.bundle_id %></p>
-                <p class="fir-package-meta"><span>版本：</span><strong><%= release.release_version.presence || release.version %></strong><% if release.build_version.present? %><span class="fir-package-build">Build <%= release.build_version %></span><% end %></p>
+                <p class="fir-package-meta"><span>版本：</span><strong><%= release.release_version.presence || release.version %></strong><% if release.build_version.present? %><span class="fir-package-build">Build <%= release.build_version %></span><% end %><span class="environment-tag" data-business-environment="<%= release.business_environment_key %>"><%= release.business_environment_label %></span></p>
                 <p class="fir-package-meta"><span>更新：</span><%= distribution_time(release.created_at) %></p>
                 <p class="fir-package-meta" title="当前版本的文件下载请求次数；不代表安装成功"><span>当前版本下载：</span><strong><%= number_with_delimiter(release.download_count) %></strong> 次</p>
                 <div class="fir-package-actions">
