@@ -42,13 +42,13 @@
   const status=(text,error=false)=>{message.textContent=text;message.classList.toggle('upload-error',error);};
   const submitLabel=()=>{submit.textContent=metadata?.duplicate&&!duplicateCheck.checked?'使用已有安装包 ↗':'开始上传 ↑';};
   const inspect=async()=>{
-    inspecting?.abort();inspected=false;metadata=null;preview.hidden=true;result.hidden=true;duplicateOptions.hidden=true;duplicateCheck.checked=false;retry.hidden=true;progress.hidden=true;progress.value=0;submit.disabled=true;submitLabel();
+    inspecting?.abort();inspected=false;metadata=null;preview.replaceChildren();preview.setAttribute('aria-busy','true');result.hidden=true;duplicateOptions.hidden=true;duplicateCheck.checked=false;retry.hidden=true;progress.hidden=true;progress.value=0;submit.disabled=true;submitLabel();
     const file=fileInput.files[0];
     if(!file){status('选择文件后，将自动检查包信息。');return;}
     if(!dialog.open)dialog.showModal();
     form.querySelector('#file-label').textContent=file.name;
     form.querySelector('#file-hint').textContent='点击可更换安装包';
-    if(!/\.(ipa|apk)$/i.test(file.name)){status('请选择 IPA 或 APK 安装包。',true);return;}
+    if(!/\.(ipa|apk)$/i.test(file.name)){preview.setAttribute('aria-busy','false');preview.textContent='包信息暂未识别';status('请选择 IPA 或 APK 安装包。',true);return;}
     status('正在识别应用并检查重复文件…');
     const data=new FormData();data.set('file',file);data.set('business_environment',form.querySelector('[name="business_environment"]:checked').value);
     const controller=new AbortController();inspecting=controller;
@@ -57,12 +57,12 @@
       if(!response.headers.get('Content-Type')?.includes('application/json'))throw new Error('服务暂时不可用，请点击重新识别重试。');
       const body=await response.json();if(!response.ok)throw new Error(body.error||'无法识别安装包');
       if(inspecting!==controller)return;
-      metadata=body;inspected=true;preview.hidden=false;preview.replaceChildren();
+      metadata=body;inspected=true;preview.setAttribute('aria-busy','false');preview.replaceChildren();
       const title=document.createElement('strong');title.textContent=`${body.name||'应用'} · ${String(body.platform).toLowerCase()==='ios'?'iOS':'Android'} · ${body.version||'版本待识别'}`;
       preview.append(title,document.createElement('br'),document.createTextNode(`${body.bundle_id||''} · ${(body.size/1024/1024).toFixed(2)} MB`));
       if(body.duplicate){const warning=document.createElement('p');warning.textContent='已有相同安装包，可直接使用原版本链接。';preview.append(warning);duplicateOptions.hidden=false;}
       status(body.duplicate?'已找到相同安装包，可直接生成已有版本的下载链接。':'包信息已就绪，可直接上传或补充更新说明。');submitLabel();
-    }catch(error){if(error.name!=='AbortError'&&inspecting===controller){status(error instanceof TypeError?'识别连接失败，请检查网络后重新识别。':error.message,true);retry.textContent='重新识别';retry.hidden=false;}}
+    }catch(error){if(error.name!=='AbortError'&&inspecting===controller){preview.setAttribute('aria-busy','false');preview.textContent='包信息暂未识别';status(error instanceof TypeError?'识别连接失败，请检查网络后重新识别。':error.message,true);retry.textContent='重新识别';retry.hidden=false;}}
     finally{if(inspecting===controller){inspecting=null;submit.disabled=!inspected;}}
   };
   document.querySelector('[data-select-package]')?.addEventListener('click',event=>{event.preventDefault();fileInput.click();});
