@@ -1,4 +1,4 @@
-https://{$ZEALOT_DOMAIN} {
+https://{$APPDOCK_DOMAIN} {
     tls internal
     header Referrer-Policy "no-referrer"
     header X-Robots-Tag "noindex, nofollow"

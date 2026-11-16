@@ -42,6 +42,8 @@ docker compose logs --tail=100 appdock web
 
 将域名在内网 DNS 或测试设备 hosts 中解析到服务器内网地址，访问 `https://你的域名/`。示例 Caddy 使用内部 CA，需要将 `deploy/data/caddy/caddy/pki/authorities/local/root.crt` 导入各测试设备并信任；iOS 还需要在证书信任设置中开启信任。若已有受信任证书，按组织已有证书方案调整 Caddy TLS 配置。不要分发 CA 私钥。
 
+同机隔离验收时，可在 `.env` 设置 `APPDOCK_HTTP_BIND=127.0.0.1:18080`、`APPDOCK_HTTPS_BIND=127.0.0.1:18443`，避免占用正式服务端口；默认仍分别绑定 80、443。
+
 应用镜像以固定 digest 的 Zealot 6.2.2 为基础覆盖当前定制源码。`deploy/data/` 保存数据库、上传包、日志及证书；备份时同时保存数据、`.env` 和原 `SECRET_TOKEN`，否则加密通知凭据无法恢复。升级前先备份。勿把这些文件提交到 Git。
 
 ## 开发与验证
@@ -50,7 +52,16 @@ Rails 源码在仓库根目录；通用 Dockerfile 保留上游完整构建方�
 
 命名统一使用 AppDock / `appdock` / `APPDOCK_*`，旧配置暂保留兼容。已有部署请先阅读 [命名迁移说明](docs/AppDock命名迁移.md)，不要直接用新 Compose 名称启动另一套空服务。
 
-`test/team_distribution/` 包含集成检查，需要独立测试数据库、服务和测试 APK。其中 Ruby 检查要求数据库名 `appdock_verify`，不可对正式数据执行。CLI 检查使用隔离端口 18443。本次开源整理只执行静态检查，未在全新机器完成部署、未验证真实 IPA 安装或业务 CI 签名构建。
+`test/team_distribution/` 包含隔离验收入口，需要独立的 Compose 项目、数据库和有效的测试 APK。验收配置使用 `appdock_verify` 数据库、回环端口 18080/18443 和 `apps.example.com` 测试主机名；不要对正式数据执行。将测试 APK 放在仓库上一级的 `checks/sample.apk`，以随机测试凭据创建 `deploy/.env`，设置 `APPDOCK_DOMAIN=apps.example.com`、`COMPOSE_PROJECT_NAME=appdock-acceptance-test1`（每次验收换唯一后缀）、`APPDOCK_HTTP_BIND=127.0.0.1:18080`、`APPDOCK_HTTPS_BIND=127.0.0.1:18443`，再运行：
+
+```sh
+docker build -f deploy/Dockerfile -t appdock:acceptance-20261116 .
+docker compose -f deploy/compose.yaml -f test/team_distribution/compose.acceptance.yaml up -d --no-build
+bash test/team_distribution/run_acceptance.sh
+docker compose -f deploy/compose.yaml -f test/team_distribution/compose.acceptance.yaml down
+```
+
+验收脚本会核查隔离配置、Rails 功能、下载哈希、权限边界、HTTPS 入口及 CLI；证书仅在验收进程中显式信任。2026-11-16 已从公开仓库干净拉取，在隔离环境完成完整镜像构建、空库首次启动及验收。真实 IPA 安装和业务工程 CI 签名构建尚未验证。
 
 ## 来源与许可证
 

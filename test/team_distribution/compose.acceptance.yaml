@@ -1,0 +1,20 @@
+name: appdock-acceptance
+
+services:
+  postgres:
+    environment:
+      POSTGRES_DB: appdock_verify
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d appdock_verify"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  appdock:
+    image: appdock:acceptance-20261116
+    environment:
+      RAILS_SERVE_STATIC_FILES: "true"
+      APPDOCK_POSTGRES_DB_NAME: appdock_verify
+      APPDOCK_DOMAIN: apps.example.com:18443
+    volumes:
+      - ../../checks:/checks:ro

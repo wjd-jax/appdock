@@ -59,8 +59,8 @@ services:
       appdock:
         condition: service_healthy
     ports:
-      - "80:80"
-      - "443:443"
+      - "${APPDOCK_HTTP_BIND:-80}:80"
+      - "${APPDOCK_HTTPS_BIND:-443}:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./data/caddy:/data

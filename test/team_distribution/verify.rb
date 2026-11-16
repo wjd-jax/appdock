@@ -32,9 +32,11 @@ s = InternalDistributionSession.new(Rails.application)
 s.host! 'apps.example.com:18443'
 s.https!
 s.get '/workspace'
-check('empty internal app list, upload requires no setup') { s.response.status==200 && s.response.body.include?('还没有团队应用') && !s.response.body.include?('目标渠道') && !s.response.body.include?('应用 / 环境') }
+check('empty workspace retains upload without target selection') { s.response.status==200 && Nokogiri::HTML(s.response.body).css('article.fir-app').empty? && Nokogiri::HTML(s.response.body).at_css('input[type=file][name=file]') && !s.response.body.include?('目标渠道') && !s.response.body.include?('应用 / 环境') }
 s.get '/upload'
-check('dedicated upload page omits Git metadata and target inputs') { s.response.status==200 && s.response.body.include?('upload-columns') && Nokogiri::HTML(s.response.body).css('input[name=branch],input[name=git_commit],select').empty? }
+check('upload entry redirects into workspace') { s.response.status==302 && URI(s.response.location).path=='/workspace' }
+s.follow_redirect!
+check('workspace upload omits Git metadata and target inputs') { s.response.status==200 && s.response.body.include?('id="upload-form"') && Nokogiri::HTML(s.response.body).css('input[name=branch],input[name=git_commit],select[name=channel_id]').empty? }
 s.get '/developers'
 check('developer setup does not depend on existing apps or channels') { s.response.status==200 && !s.response.body.include?('setup-channel') && !s.response.body.include?('channel_key') }
 csrf = Nokogiri::HTML(s.response.body).at_css('meta[name="csrf-token"]')['content']
@@ -63,7 +65,7 @@ check('fixed app download page immediately shows newest version without recommen
 s.get "/a/#{app.id}/qrcode"
 check('fixed app QR image available') { s.response.status==200 && s.response.media_type.start_with?('image/') }
 s.get '/workspace'
-check('one app card, no target/environment controls') { s.response.status==200 && s.response.body.scan('class="card team-app-card"').size==1 && !s.response.body.include?('upload-channel') && !s.response.body.include?('固定环境') }
+check('one app card, no target/environment controls') { s.response.status==200 && Nokogiri::HTML(s.response.body).css('article.fir-app').size==1 && !s.response.body.include?('upload-channel') && !s.response.body.include?('固定环境') }
 s.get URI(newest.release_url).request_uri
 check('version page contains safe notes and no channel workflow') { s.response.status==200 && s.response.body.include?('&lt;script&gt;') && !s.response.body.include?('管理此渠道') }
 s.get URI(newest.download_url).request_uri
