@@ -12,6 +12,8 @@
 
 新部署的数据库和 Compose 项目均为 `appdock`。旧部署不能直接套用新 Compose 启动：应先备份并验证恢复，停止旧应用、后台任务和维护任务，保留原数据目录、上传包及 Rails 密钥，再迁移数据库名和运行配置。
 
+如果 `.env` 中设置了 `COMPOSE_PROJECT_NAME`，必须一并改为 `appdock`；该变量会覆盖 Compose 文件中的 `name`。旧项目需先停止，再启动新项目，避免两套 PostgreSQL 同时挂载同一个数据目录。
+
 如果暂时沿用原数据库，请将 Compose 的 `POSTGRES_DB`、健康检查和应用的 `APPDOCK_POSTGRES_DB_NAME` 同步设为现有数据库名。PostgreSQL 对已有数据目录不会因为修改 `POSTGRES_DB` 自动改名。
 
 为保持旧登录和渠道下载授权，可在既有部署设置：
