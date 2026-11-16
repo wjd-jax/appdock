@@ -3,7 +3,7 @@
 <title><%= content_for?(:title) ? "#{yield(:title)} · AppDock" : 'AppDock · 团队应用分发' %></title>
 <link rel="icon" href="/distribution/appdock-logo.svg" type="image/svg+xml"><meta name="referrer" content="<%= controller_path == 'distribution/udids' ? 'no-referrer' : 'same-origin' %>"><meta name="robots" content="noindex,nofollow">
 <%= csrf_meta_tags %>
-<link rel="stylesheet" href="/distribution/app.css?v=6"><script src="/distribution/app.js?v=10" defer></script>
+<link rel="stylesheet" href="/distribution/app.css?v=7"><script src="/distribution/app.js?v=10" defer></script>
 </head><body>
 <header class="topbar"><a class="brand" href="/"><img class="brand-logo" src="/distribution/appdock-logo.svg" alt="">AppDock</a><nav>
 <% if Distribution::PublicContext.external %><span class="badge">应用下载</span>
