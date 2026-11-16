@@ -170,3 +170,7 @@
   .release-download .release-related{display:grid;gap:8px;margin-top:18px}
   .release-download .release-technical{margin-top:18px}
 }
+
+/* Bring the version number closer to the package identifier on product summary cards. */
+.app-download:not(.package-download) .platform-card>.row + p.muted{margin-bottom:8px}
+.app-download:not(.package-download) .platform-card .version-number{margin-top:8px}
