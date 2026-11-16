@@ -1,4 +1,4 @@
-CREATE USER zealot SUPERUSER;
-CREATE DATABASE zealot_development WITH OWNER zealot;
-CREATE DATABASE zealot_test WITH OWNER zealot;
-CREATE DATABASE zealot WITH OWNER zealot;
+CREATE USER appdock SUPERUSER;
+CREATE DATABASE appdock_development WITH OWNER appdock;
+CREATE DATABASE appdock_test WITH OWNER appdock;
+CREATE DATABASE appdock WITH OWNER appdock;

@@ -25,7 +25,7 @@ class Api::UsersController < Api::BaseController
   # GET /api/users/search
   def search
     email = params[:email]
-    raise Zealot::Error::RecordNotFound.new(model: User) if email.blank?
+    raise AppDock::Error::RecordNotFound.new(model: User) if email.blank?
 
     @user = User.find_by!(email: email)
     authorize @user

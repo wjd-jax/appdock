@@ -1,5 +1,5 @@
 #!/usr/bin/with-contenv sh
 
 cd /app
-./bin/rails zealot:upgrade
+./bin/rails appdock:upgrade
 exit 0

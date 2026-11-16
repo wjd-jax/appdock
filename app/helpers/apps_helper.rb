@@ -23,7 +23,7 @@ module AppsHelper
       return image_tag(src, **options)
     end
     unless release&.icon && release.icon.file && release.icon.file.exists?
-      return image_tag('zealot-icon.png', **options)
+      return image_tag('/distribution/appdock-logo.svg', **options)
     end
 
     options[:data] ||= {}

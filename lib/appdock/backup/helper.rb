@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-module Zealot::Backup
+module AppDock::Backup
   module Helper
 
     def backup_root_path
@@ -28,7 +28,7 @@ module Zealot::Backup
     end
 
     def gzip_cmd
-      @gzip_cmd ||= if ENV['ZEALOT_BACKUP_GZIP_RSYNCABLE'] == 'yes'
+      @gzip_cmd ||= if ENV['APPDOCK_BACKUP_GZIP_RSYNCABLE'] == 'yes'
                       "gzip --rsyncable -c -1"
                     else
                       "gzip -c -1"

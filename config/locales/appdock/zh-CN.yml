@@ -176,7 +176,7 @@ zh-CN:
       title: 环境信息
       index:
         title: :'admin.system_info.title'
-        zealot_version: 版本号
+        appdock_version: 版本号
         vcs_ref: Git 哈希值
         build_date: 构建日期
         server_info: 服务器信息
@@ -200,7 +200,7 @@ zh-CN:
         new_version: "发现新版本 "
         dev_new_version: 发现新版本 (开发环境始终显示)
         messages:
-          file_permissions_tip: 如果你看到上面路径有显示红色异常图标那就是表面该路径无法写入可能会造成 Zealot 无法正常使用或发生异常情况
+          file_permissions_tip: 如果你看到上面路径有显示红色异常图标那就是表面该路径无法写入可能会造成 AppDock 无法正常使用或发生异常情况
           path_not_exist: 路径不存在
           path_not_writable: 路径不可写
           path_not_readable: 路径不可读
@@ -816,7 +816,7 @@ zh-CN:
       register_device: 注册设备
       related_apple_keys_not_found: 没有发现苹果开发者账户
       related_apps_not_found_with_registered_device: 本设备是通过其他设备同步的方式被注册，但您的设备还没有关联的应用上传
-      related_apps_not_found: 当前设备可能还没有注册到苹果开发者或注册的应用没有上传到 Zealot
+      related_apps_not_found: 当前设备可能还没有注册到苹果开发者或注册的应用没有上传到 AppDock
     install:
       title: 获取设备 UDID 描述文件
       organization: 苹果 UDID 授权服务
@@ -1098,7 +1098,7 @@ zh-CN:
   user_mailer:
     omniauth_welcome_email:
       subject: 欢迎使用 %{title}
-      default_password: 您已经使用第三方登录成功授权注册了 Zealot 账号，系统随机生成了默认的密码：
+      default_password: 您已经使用第三方登录成功授权注册了 AppDock 账号，系统随机生成了默认的密码：
   devise:
     confirmations:
       new:

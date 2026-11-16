@@ -22,9 +22,9 @@
 
 require 'open3'
 
-module Zealot::Backup
+module AppDock::Backup
   class Uploads
-    include Zealot::Backup::Helper
+    include AppDock::Backup::Helper
 
     class Error < StandardError; end
 
@@ -122,7 +122,7 @@ module Zealot::Backup
       regex = /^g?tar: \.: Cannot mkdir: No such file or directory$/
       error = err_r.read
 
-      raise Zealot::Backup::UploadsError, "Backup failed: #{error}" unless error =~ regex
+      raise AppDock::Backup::UploadsError, "Backup failed: #{error}" unless error =~ regex
     end
 
     def gzip_args

@@ -24,7 +24,7 @@ services:
     restart: unless-stopped
     network_mode: service:db
     environment:
-      DATABASE_URL: "postgres://postgres:postgres@localhost:5432/zealot_development"
+      DATABASE_URL: "postgres://postgres:postgres@localhost:5432/appdock_development"
 
 volumes:
   postgres-data:

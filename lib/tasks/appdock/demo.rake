@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-namespace :zealot do
+namespace :appdock do
   namespace :demo do
     DEMO_APP = "Pockage Casts"
 
@@ -36,7 +36,7 @@ namespace :zealot do
 
     task generate_users: :environment do
       password = '1234567890'     # insecret password, just for test.
-      email_domain = 'zealot.com' # fake too
+      email_domain = 'appdock.com' # fake too
       accounts = {
         admin: 3,
         developer: 5,

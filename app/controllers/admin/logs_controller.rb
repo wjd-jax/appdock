@@ -6,7 +6,7 @@ require 'open3'
 class Admin::LogsController < ApplicationController
   before_action :set_log, only: :retrive
 
-  DEFAULT_FILENAME = Rails.env.development? ? 'development.log' : 'zealot.log'
+  DEFAULT_FILENAME = Rails.env.development? ? 'development.log' : 'appdock.log'
   MAX_LINE_NUMBER = 500
 
   def index

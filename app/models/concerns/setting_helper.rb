@@ -3,7 +3,7 @@
 module SettingHelper
   extend ActiveSupport::Concern
 
-  REPO_URL = 'https://github.com/tryzealot/zealot'
+  REPO_URL = 'https://github.com/wjd-jax/appdock'
 
   class_methods do
     def builtin_schemes
@@ -35,7 +35,7 @@ module SettingHelper
     end
 
     def site_https
-      Rails.env.production? || ENV['ZEALOT_USE_HTTPS'].present?
+      Rails.env.production? || ENV['APPDOCK_USE_HTTPS'].present?
     end
 
     def site_configs
@@ -98,7 +98,7 @@ module SettingHelper
     end
 
     def default_domain
-      site_https ? 'localhost' : "localhost:#{ENV['ZEALOT_PORT'] || 3000}"
+      site_https ? 'localhost' : "localhost:#{ENV['APPDOCK_PORT'] || 3000}"
     end
 
     def version_info(suffix: false)

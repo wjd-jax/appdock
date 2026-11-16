@@ -74,7 +74,7 @@ plugin :tmp_restart
 # provide an authentication token, so all requests to the control server
 # will need to include that token as a query parameter. This allows for
 # simple authentication.
-activate_control_app "tcp://#{ENV.fetch('PUMA_CONTROL_URL') { '127.0.0.1:9293' }}", { auth_token: ENV.fetch('PUMA_CONTROL_URL_TOKEN') { 'zealot' } }
+activate_control_app "tcp://#{ENV.fetch('PUMA_CONTROL_URL') { '127.0.0.1:9293' }}", { auth_token: ENV.fetch('PUMA_CONTROL_URL_TOKEN') { 'appdock' } }
 
 # Handle good_job
 # if workers_size > 0 && defined?(GoodJob)

@@ -11,7 +11,7 @@
         h3.card-title = t('.server_info')
       .card-body
         dl.system-info
-          dt = t('.zealot_version')
+          dt = t('.appdock_version')
           dd[
             data-controller="admin-new-release"
             data-admin-new-release-version-value="#{Setting.version_info}"
@@ -20,10 +20,10 @@
             pre
               #current-version = Setting.version_info(suffix: true)
               #new-version data-admin-new-release-target="newVersion"
-          - if @server[:zealot_vcs_ref]
+          - if @server[:appdock_vcs_ref]
             dt = t('.vcs_ref')
             dd
-              pre = vcs_ref_link(@server[:zealot_vcs_ref])
+              pre = vcs_ref_link(@server[:appdock_vcs_ref])
           - if @server[:build_date]
             dt = t('.build_date')
             dd

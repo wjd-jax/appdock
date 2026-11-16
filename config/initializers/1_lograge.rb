@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Default log format is key-value pairs.
-if Rails.env.production? && ENV['ZEALOT_LOG_FORMAT'] != 'rails'
+if Rails.env.production? && ENV['APPDOCK_LOG_FORMAT'] != 'rails'
   def fetch_ip(controller)
     controller.request.remote_ip
   rescue ActionDispatch::RemoteIp::IpSpoofAttackError
@@ -38,7 +38,7 @@ if Rails.env.production? && ENV['ZEALOT_LOG_FORMAT'] != 'rails'
     config.lograge.enabled = true
 
     config.lograge.logger = ActiveSupport::TaggedLogging.new(Logger.new(STDOUT))
-    config.lograge.formatter = case ENV['ZEALOT_LOG_FORMAT']
+    config.lograge.formatter = case ENV['APPDOCK_LOG_FORMAT']
                                when 'json'
                                  Lograge::Formatters::JSON.new
                                when 'lines'

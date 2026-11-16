@@ -662,7 +662,7 @@ class CreateSampleDataService
 
   def stardford_app(user) # rubocop:disable Metrics/MethodLength
     app_name = I18n.t('demo.app_name1')
-    app_bundle_id = 'com.zealot.app-demo'
+    app_bundle_id = 'com.appdock.app-demo'
     schemes = [
       {
         name: I18n.t('settings.preset_schemes.beta'),
@@ -763,7 +763,7 @@ class CreateSampleDataService
 
   def android_channels_app(user)
     app_name = I18n.t('demo.app_name2')
-    app_bundle_id = 'com.zealot.android.app-demo'
+    app_bundle_id = 'com.appdock.android.app-demo'
     schemes = [ I18n.t('settings.preset_schemes.production') ]
     channels = I18n.t('demo.android_channels', locale: :en).values
     changelog = "bump 0.1.0\nfix: xxx\nfeat: xxx done"
@@ -864,8 +864,8 @@ class CreateSampleDataService
       apple_key.save(validate: false)
       apple_key.create_team(
         team_id: 'PZYM8XX95Q',
-        name: 'Zealot Team',
-        display_name: 'Zealot Developer Team (Alias Name)',
+        name: 'AppDock Team',
+        display_name: 'AppDock Developer Team (Alias Name)',
       )
     end
 

@@ -1,10 +1,10 @@
 databases:
-- name: zealot-db
+- name: appdock-db
   plan: free
   region: singapore
 services:
 - type: web
-  name: zealot-web
+  name: appdock-web
   env: docker
   plan: free
   region: singapore
@@ -12,21 +12,21 @@ services:
   dockerContext: .
   autoDeploy: true
   # disk:
-  #   name: zealot-data
+  #   name: appdock-data
   #   mountPath: /app/public/uploads
   #   sizeGB: 10
   envVars:
-  - key: ZEALOT_ADMIN_EMAIL
+  - key: APPDOCK_ADMIN_EMAIL
     sync: false
-  - key: ZEALOT_ADMIN_PASSWORD
+  - key: APPDOCK_ADMIN_PASSWORD
     sync: false
-  - key: ZEALOT_DOMAIN
+  - key: APPDOCK_DOMAIN
     sync: false
   - key: DEFAULT_LOCALE
     sync: false
-  - key: ZEALOT_GUEST_MODE
+  - key: APPDOCK_GUEST_MODE
     value: false
-  - key: ZEALOT_REGISTER_ENABLED
+  - key: APPDOCK_REGISTER_ENABLED
     value: false
 
   - key: SMTP_ADDRESS
@@ -93,28 +93,28 @@ services:
   - key: GOOGLE_ANALYTICS_ID
     value: false
 
-  - key: ZEALOT_POSTGRES_HOST
+  - key: APPDOCK_POSTGRES_HOST
     fromDatabase:
-      name: zealot-db
+      name: appdock-db
       property: host
-  - key: ZEALOT_POSTGRES_PORT
+  - key: APPDOCK_POSTGRES_PORT
     fromDatabase:
-      name: zealot-db
+      name: appdock-db
       property: port
-  - key: ZEALOT_POSTGRES_USERNAME
+  - key: APPDOCK_POSTGRES_USERNAME
     fromDatabase:
-      name: zealot-db
+      name: appdock-db
       property: user
-  - key: ZEALOT_POSTGRES_PASSWORD
+  - key: APPDOCK_POSTGRES_PASSWORD
     fromDatabase:
-      name: zealot-db
+      name: appdock-db
       property: password
-  - key: ZEALOT_POSTGRES_DB_NAME
+  - key: APPDOCK_POSTGRES_DB_NAME
     fromDatabase:
-      name: zealot-db
+      name: appdock-db
       property: database
   - key: PORT
-    value: 80 # Do not edit! Zealot exposes this internally
+    value: 80 # Do not edit! AppDock exposes this internally
   - key: RAILS_MAX_THREADS
     value: 1
   - key: WEB_CONCURRENCY

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'fileutils'
-require_relative '../../lib/zealot/backup/manager'
+require_relative '../../lib/appdock/backup/manager'
 
 class BackupJob < ApplicationJob
   queue_as :schedule
@@ -19,10 +19,10 @@ class BackupJob < ApplicationJob
     )
   end
 
-  rescue_from(Zealot::Backup::DatabaseError) do |e|
+  rescue_from(AppDock::Backup::DatabaseError) do |e|
     logger.error(e.message)
 
-    key = e.is_a?(Zealot::Backup::DumpDatabaseError) ?
+    key = e.is_a?(AppDock::Backup::DumpDatabaseError) ?
       'active_job.backup.failures.dump_command' : 'active_job.backup.failures.restore_command'
     notificate_failure(
       user_id: @user_id,
@@ -44,7 +44,7 @@ class BackupJob < ApplicationJob
   def perform(backup_id, user_id = nil)
     @user_id = user_id
     @backup = Backup.find(backup_id)
-    @manager = Zealot::Backup::Manager.new(backup_path, logger)
+    @manager = AppDock::Backup::Manager.new(backup_path, logger)
 
     update_status('start',
       total: 100,

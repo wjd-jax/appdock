@@ -63,7 +63,7 @@ FROM --platform=$BUILDPLATFORM ruby:3.4.7-alpine
 ARG BUILD_DATE
 ARG VCS_REF
 ARG TAG
-ARG ZEALOT_VERSION
+ARG APPDOCK_VERSION
 
 ARG REPLACE_CHINA_MIRROR="true"
 ARG ORIGINAL_REPO_URL="dl-cdn.alpinelinux.org"
@@ -79,8 +79,8 @@ ENV TZ="Asia/Shanghai" \
     PS1="$(whoami)@$(hostname):$(pwd)$ " \
     DOCKER_TAG="$TAG" \
     BUNDLE_APP_CONFIG="$APP_ROOT/.bundle" \
-    ZEALOT_VCS_REF="$VCS_REF" \
-    ZEALOT_BUILD_DATE="$BUILD_DATE" \
+    APPDOCK_VCS_REF="$VCS_REF" \
+    APPDOCK_BUILD_DATE="$BUILD_DATE" \
     RAILS_ENV="production" \
     RUBY_YJIT_ENABLE="true"
 

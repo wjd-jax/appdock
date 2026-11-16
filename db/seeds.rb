@@ -14,7 +14,7 @@ else
   puts 'CREATED ADMIN USER: ' << user.email
 end
 
-skip_sample_data = ActiveModel::Type::Boolean.new.cast(ENV['ZEALOT_SKIP_SAMPLE_DATE'] || false)
+skip_sample_data = ActiveModel::Type::Boolean.new.cast(ENV['APPDOCK_SKIP_SAMPLE_DATE'] || false)
 unless skip_sample_data
   CreateSampleDataService.new.call(user)
   puts 'CREATED EXAMPLE APPS DATA'

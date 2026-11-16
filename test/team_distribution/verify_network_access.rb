@@ -1,5 +1,5 @@
 require 'action_dispatch/testing/integration'
-raise 'Isolation required' unless ActiveRecord::Base.connection_db_config.database == 'zealot_verify'
+raise 'Isolation required' unless ActiveRecord::Base.connection_db_config.database == 'appdock_verify'
 def check(label)
   raise label unless yield
   puts "PASS #{label}"

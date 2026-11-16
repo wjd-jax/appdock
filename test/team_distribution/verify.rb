@@ -2,7 +2,7 @@
 require 'action_dispatch/testing/integration'
 require 'nokogiri'
 require 'json'
-raise 'Isolated verification database required' unless ActiveRecord::Base.connection_db_config.database == 'zealot_verify'
+raise 'Isolated verification database required' unless ActiveRecord::Base.connection_db_config.database == 'appdock_verify'
 Rails.application.executor.run!
 class InternalDistributionSession < ActionDispatch::Integration::Session
   def process(*args, **kwargs)

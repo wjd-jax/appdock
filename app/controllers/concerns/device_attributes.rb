@@ -27,11 +27,11 @@ module DeviceAttributes
   end
 
   def subject
-    @subject ||= OpenSSL::X509::Name.parse("/C=CN/O=tryzealot/OU=zealot/CN=#{Setting.site_title} Self-signed Authority")
+    @subject ||= OpenSSL::X509::Name.parse("/C=CN/O=AppDock/OU=appdock/CN=#{Setting.site_title} Self-signed Authority")
   end
 
   def issuer
-    @issuer ||= OpenSSL::X509::Name.parse("/C=CN/O=tryzealot/OU=zealot/CN=#{Setting.site_title}")
+    @issuer ||= OpenSSL::X509::Name.parse("/C=CN/O=AppDock/OU=appdock/CN=#{Setting.site_title}")
   end
 
   def root_key

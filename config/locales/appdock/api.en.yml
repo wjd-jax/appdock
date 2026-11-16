@@ -22,7 +22,7 @@ en:
         ## Authentication
 
         This API only accepts one options for authentication: Personal access tokens.
-        All tokens are tied to a Zealot user and use the `token` query of the request.
+        All tokens are tied to a AppDock user and use the `token` query of the request.
 
         Example:
 

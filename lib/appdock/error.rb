@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-class Zealot::Error < StandardError
+class AppDock::Error < StandardError
   def initialize(data = nil)
     @data = data
     super
   end
 
-  class RecordExisted < Zealot::Error
+  class RecordExisted < AppDock::Error
     def message
       I18n.t('errors.messages.record_existed', model: @data[:model].model_name.human)
     end
   end
 
-  class RecordNotFound < Zealot::Error
+  class RecordNotFound < AppDock::Error
     def message
       case @data[:model]
       when User.class
@@ -23,14 +23,14 @@ class Zealot::Error < StandardError
     end
   end
 
-  class AppArchivedDeny < Zealot::Error
+  class AppArchivedDeny < AppDock::Error
     def message
       I18n.t('errors.messages.app_archived', name: @data[:name])
     end
   end
 
   module API
-    class NotFound < Zealot::Error
+    class NotFound < AppDock::Error
       def message
         I18n.t('errors.messages.api_not_found')
       end

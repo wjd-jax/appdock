@@ -59,7 +59,7 @@ class AppleKey < ApplicationRecord
     message = e.errors[0]['detail']
     is_exists = message.include?('already exists')
 
-    # udid had registered, but not exists in zealot system, needs to force sync device
+    # udid had registered, but not exists in appdock system, needs to force sync device
     if is_exists
       sync_devices
       return self

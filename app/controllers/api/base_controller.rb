@@ -23,7 +23,7 @@ class Api::BaseController < ActionController::API
               AppInfo::UnknownFormatError, with: :render_missing_params_error
   rescue_from ActionController::UnknownFormat, with: :not_acceptable
   rescue_from ActionController::InvalidAuthenticityToken, with: :unprocessable_entity
-  rescue_from Zealot::Error::RecordExisted, with: :render_record_existed_error
+  rescue_from AppDock::Error::RecordExisted, with: :render_record_existed_error
 
   def validate_user_token
     if DistributionAccess.trusted_lan?
@@ -99,7 +99,7 @@ class Api::BaseController < ActionController::API
   end
 
   def raise_not_found
-    exception = Zealot::Error::API::NotFound.new
+    exception = AppDock::Error::API::NotFound.new
     respond_with_error(:not_found, exception)
   end
 

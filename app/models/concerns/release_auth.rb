@@ -3,7 +3,7 @@
 module ReleaseAuth
   extend ActiveSupport::Concern
 
-  COOKIE_KEY_PREFIX = 'zealot_app_channel_auth_'
+  COOKIE_KEY_PREFIX = ENV.fetch('APPDOCK_CHANNEL_COOKIE_PREFIX', 'appdock_app_channel_auth_')
 
   def cookie_password_matched?(cookies)
     channel.password.blank? || cookies[cache_key] == channel.encode_password

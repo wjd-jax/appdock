@@ -1,6 +1,6 @@
 class DistributionAccess
   def self.trusted_lan?
-    ENV['ZEALOT_TRUSTED_LAN'] == 'true'
+    ENV['APPDOCK_TRUSTED_LAN'] == 'true'
   end
 
   # 内网共享操作者只用于持久化上传归属和后台任务，不提供前台登录凭据。

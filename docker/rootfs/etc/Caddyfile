@@ -4,25 +4,25 @@
 }
 
 :80
-root * /{$ZEALOT_PATH:app}/public
+root * /{$APPDOCK_PATH:app}/public
 encode zstd gzip
 file_server
 log {
-	output file /{$ZEALOT_PATH:app}/log/caddy.log {
+	output file /{$APPDOCK_PATH:app}/log/caddy.log {
 		roll_size 50mb
 		roll_keep 5
 		roll_keep_for 720h
 	}
 }
 
-@zealot {
+@appdock {
 	path *
 
 	# static files
 	not file
 }
 
-reverse_proxy @zealot {
+reverse_proxy @appdock {
 	to localhost:3000
 
 	# health_uri /api/health

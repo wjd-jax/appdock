@@ -74,7 +74,7 @@ Rails.application.configure do
   config.action_mailer.smtp_settings = {
     address:              ENV['SMTP_ADDRESS'],
     port:                 ENV['SMTP_PORT'].to_i,
-    domain:               ENV['SMTP_DOMAIN'] || ENV['ZEALOT_DOMAIN'],
+    domain:               ENV['SMTP_DOMAIN'] || ENV['APPDOCK_DOMAIN'],
     user_name:            ENV['SMTP_USERNAME'].presence,
     password:             ENV['SMTP_PASSWORD'].presence,
     authentication:       ENV['SMTP_AUTH_METHOD'] == 'none' ? nil : ENV['SMTP_AUTH_METHOD'].presence || 'plain',
@@ -84,7 +84,7 @@ Rails.application.configure do
   }
 
   config.action_dispatch.default_headers = {
-    'Server'                 => 'Zealot',
+    'Server'                 => 'AppDock',
     'X-Frame-Options'        => 'sameorigin',
     'X-Content-Type-Options' => 'nosniff',
     'X-XSS-Protection'       => '1; mode=block',

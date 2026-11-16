@@ -2,12 +2,12 @@ doctype html
 html
   head
     title = yield :title
-    link[rel="apple-zealot-icon" sizes="60x60" href="#{asset_path('zealot-icon.png')}"]
-    link[rel="apple-zealot-icon" sizes="120x120" href="#{asset_path('zealot-icon@2x.png')}"]
-    link[rel="apple-zealot-icon" sizes="180x180" href="#{asset_path('zealot-icon@3x.png')}"]
-    link[rel="icon" type="image/x-icon" href="#{asset_path('zealot-icon@3x.png')}"]\
+    link[rel="apple-touch-icon" sizes="60x60" href="#{asset_path('/distribution/appdock-logo.svg')}"]
+    link[rel="apple-touch-icon" sizes="120x120" href="#{asset_path('/distribution/appdock-logo.svg')}"]
+    link[rel="apple-touch-icon" sizes="180x180" href="#{asset_path('/distribution/appdock-logo.svg')}"]
+    link[rel="icon" type="image/x-icon" href="#{asset_path('/distribution/appdock-logo.svg')}"]\
     meta[name="turbo-prefetch" content="false"]
-    == favicon_link_tag 'zealot-icon.png'
+    == favicon_link_tag '/distribution/appdock-logo.svg'
     == stylesheet_link_tag 'application'
     == javascript_include_tag 'application', defer: true
     == csrf_meta_tags

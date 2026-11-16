@@ -81,7 +81,7 @@ class Backup < ApplicationRecord
     data << "#{enabled_apps.size} apps" if enabled_apps
 
     {
-      description: "Backup zealot #{data.join(' | ')} data",
+      description: "Backup appdock #{data.join(' | ')} data",
       cron: Fugit.parse(schedule).to_cron_s,
       class:'BackupJob',
       args: [ id ]
@@ -89,7 +89,7 @@ class Backup < ApplicationRecord
   end
 
   def schedule_key
-    @scheduler_key ||= "zealot_backup_#{key}".to_sym
+    @scheduler_key ||= "appdock_backup_#{key}".to_sym
   end
 
   private

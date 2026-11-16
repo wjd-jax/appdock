@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/zealot/goodjob_health_check'
+require_relative '../../lib/appdock/goodjob_health_check'
 
 Rails.configuration.to_prepare do
   HealthCheck.setup do |config|
@@ -12,10 +12,10 @@ Rails.configuration.to_prepare do
     config.full_checks = %w[database migrations cache goodjob]
 
     config.add_custom_check('goodjob') do
-      Zealot::GoodjobHealthCheck.check
+      AppDock::GoodjobHealthCheck.check
     end
 
-    ip_whitelist = ENV['ZEALOT_HEALTH_CHECK_IP_WHITELIST']
+    ip_whitelist = ENV['APPDOCK_HEALTH_CHECK_IP_WHITELIST']
     ip_whitelist = ip_whitelist.split(',').select(&:present?).map(&:strip) if ip_whitelist.present?
     config.origin_ip_whitelist = ip_whitelist if ip_whitelist.present?
 

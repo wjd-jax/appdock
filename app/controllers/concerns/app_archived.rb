@@ -6,6 +6,6 @@ module AppArchived
   def raise_if_app_archived!(app)
     return unless app.archived
 
-    raise Zealot::Error::AppArchivedDeny, name: app.name
+    raise AppDock::Error::AppArchivedDeny, name: app.name
   end
 end

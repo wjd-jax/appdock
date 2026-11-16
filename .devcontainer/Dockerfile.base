@@ -41,7 +41,7 @@ RUN mise use -g usage || true && \
     echo 'eval "$(mise activate bash)"' >> ~/.bashrc && \
     sed -i -E "s/^plugins=\(.+\)$/plugins=(debian history mise git tmux npm ruby gem bundler rake rails)/g" ~/.zshrc
 
-ENV ZEALOT_PATH=/workspace
+ENV APPDOCK_PATH=/workspace
 WORKDIR /workspace
 
 COPY .mise.toml ./

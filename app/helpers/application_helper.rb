@@ -192,11 +192,11 @@ module ApplicationHelper # rubocop:disable Metrics/ModuleLength
 
   def powered_by
     content_tag :span, class: 'powered_by' do
-      link_to 'Powered by Zealot', 'https://zealot.ews.im'
+      link_to 'Powered by AppDock', 'https://github.com/wjd-jax/appdock'
     end
   end
 
-  def zealot_version
+  def appdock_version
     content_tag :span, class: 'version ms-1' do
       prefix = 'Version'
       version_link = link_to Setting.version_info(suffix: true), Setting.repo_url

@@ -9,7 +9,7 @@ zh-CN:
         - [Postman](https://www.postman.com/downloads/)
         - 任意浏览器，如果你不需要设置 headers 或请求主体
 
-        准备好工具，你可以通过 `GET` 请求 {host}/api/version 可看到 Zealot 版本信息：
+        准备好工具，你可以通过 `GET` 请求 {host}/api/version 可看到 AppDock 版本信息：
 
         ```json
         {

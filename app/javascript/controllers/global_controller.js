@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import * as ActionCable from "@rails/actioncable"
-import { Zealot } from "./zealot"
+import { AppDock } from "./appdock"
 import { application } from "./application"
 
 export default class extends Controller {
@@ -16,7 +16,7 @@ export default class extends Controller {
     }
 
     try {
-      this.initZealot()
+      this.initAppDock()
       this.setupRailsDebugMode()
       this.switchDarkMode()
       this.isInitialized = true
@@ -25,18 +25,18 @@ export default class extends Controller {
     }
   }
 
-  initZealot() {
-    Zealot.rootUrl = this.rootUrlValue
-    Zealot.siteApperance = this.appearanceValue
-    Zealot.env = this.envValue
+  initAppDock() {
+    AppDock.rootUrl = this.rootUrlValue
+    AppDock.siteApperance = this.appearanceValue
+    AppDock.env = this.envValue
   }
 
   switchDarkMode() {
-    const appearance = Zealot.siteApperance
+    const appearance = AppDock.siteApperance
     this.setGoodJobThemeMode(appearance);
-    if (appearance === "dark" || (appearance === "auto" && Zealot.isDarkMode())) {
+    if (appearance === "dark" || (appearance === "auto" && AppDock.isDarkMode())) {
       document.documentElement.setAttribute("data-bs-theme", "dark");
-    } else if (appearance === "light" && Zealot.isDarkMode()) {
+    } else if (appearance === "light" && AppDock.isDarkMode()) {
       var darkBrandImage = document.getElementsByClassName("dark-brand-image")
       Array.prototype.forEach.call(darkBrandImage, (element) => {
         element.remove()
@@ -49,7 +49,7 @@ export default class extends Controller {
   }
 
   setupRailsDebugMode() {
-    application.debug = Zealot.isDevelopment()
-    ActionCable.logger.enabled = Zealot.isDevelopment()
+    application.debug = AppDock.isDevelopment()
+    ActionCable.logger.enabled = AppDock.isDevelopment()
   }
 }

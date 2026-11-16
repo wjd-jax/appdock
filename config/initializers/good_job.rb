@@ -42,15 +42,15 @@ Rails.application.reloader.to_prepare do
     config.good_job.on_thread_error = -> (exception) { Rails.error.report(exception) }
     config.good_job.execution_mode = :async
     config.good_job.queues = '*'
-    config.good_job.max_threads = (ENV['ZEALOT_WORKER_CONCURRENCY'] || '5').to_i
-    config.good_job.poll_interval = (ENV['ZEALOT_WORKER_POLL_INTERVAL'] || '30').to_i
-    config.good_job.shutdown_timeout = (ENV['ZEALOT_WORKER_SHUTDOWN_TIMEOUT'] || '30').to_i
+    config.good_job.max_threads = (ENV['APPDOCK_WORKER_CONCURRENCY'] || '5').to_i
+    config.good_job.poll_interval = (ENV['APPDOCK_WORKER_POLL_INTERVAL'] || '30').to_i
+    config.good_job.shutdown_timeout = (ENV['APPDOCK_WORKER_SHUTDOWN_TIMEOUT'] || '30').to_i
 
     begin
       config.good_job.enable_cron = true
       config.good_job.cron = CRON_JOBS_SETUP.call
     rescue ActiveRecord::StatementInvalid
-      # initialize zealot, ignore
+      # initialize appdock, ignore
     end
   end
 end

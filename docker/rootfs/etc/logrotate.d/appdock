@@ -1,4 +1,4 @@
-/app/log/zealot.log {
+/app/log/appdock.log {
   missingok
   notifempty
 }

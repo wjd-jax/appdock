@@ -51,7 +51,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     uri = URI("https://api.github.com/user/orgs")
     req = Net::HTTP::Get.new(uri)
     req["Authorization"] = "Bearer #{token}"
-    req["User-Agent"] = "zealot"
+    req["User-Agent"] = "appdock"
   
     res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
       http.request(req)

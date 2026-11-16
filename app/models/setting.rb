@@ -15,18 +15,18 @@ class Setting < RailsSettings::Base
   field :distribution_lark_status, type: :hash, default: {}, display: false
 
   scope :general do
-    field :site_title, default: 'Zealot', type: :string, display: true,
+    field :site_title, default: 'AppDock', type: :string, display: true,
           validates: { presence: true, length: { in: 3..16 } }
     field :site_https, default: site_https, type: :boolean, readonly: true, display: true
-    field :site_domain, default: (ENV['ZEALOT_DOMAIN'] || default_domain), type: :string,
+    field :site_domain, default: (ENV['APPDOCK_DOMAIN'] || default_domain), type: :string,
           restart_required: true, display: true
     field :site_locale, default: Rails.configuration.i18n.default_locale.to_s, type: :string, display: true,
           validates: { presence: true, inclusion: { in: Rails.configuration.i18n.available_locales.map(&:to_s) } }
-    field :site_appearance, default: (ENV['ZEALOT_APPEARANCE'] || builtin_appearances.keys[0].to_s),
+    field :site_appearance, default: (ENV['APPDOCK_APPEARANCE'] || builtin_appearances.keys[0].to_s),
           type: :string, display: true,
           validates: { presence: true, inclusion: { in: builtin_appearances.keys.map(&:to_s) } }
-    field :admin_email, default: (ENV['ZEALOT_ADMIN_EMAIL'] || 'admin@zealot.com'), type: :string, readonly: true
-    field :admin_password, default: (ENV['ZEALOT_ADMIN_PASSWORD'] || 'ze@l0t'), type: :string, readonly: true
+    field :admin_email, default: (ENV['APPDOCK_ADMIN_EMAIL'] || 'admin@example.com'), type: :string, readonly: true
+    field :admin_password, default: (ENV['APPDOCK_ADMIN_PASSWORD'] || 'ze@l0t'), type: :string, readonly: true
   end
 
   scope :presets do
@@ -34,28 +34,28 @@ class Setting < RailsSettings::Base
           validates: { json: { format: :array } }
     field :preset_role, default: 'member', type: :string, display: true,
           validates: { presence: true, inclusion: { in: builtin_roles.keys.map(&:to_s) } }
-    field :per_page, default: ENV.fetch('ZEALOT_PER_PAGE', '25').to_i, type: :integer, display: true,
+    field :per_page, default: ENV.fetch('APPDOCK_PER_PAGE', '25').to_i, type: :integer, display: true,
           validates: { presence: true, numericality: { only_integer: true } }
-    field :max_per_page, default: ENV.fetch('ZEALOT_MAX_PER_PAGE', '100').to_i, type: :integer, display: true,
+    field :max_per_page, default: ENV.fetch('APPDOCK_MAX_PER_PAGE', '100').to_i, type: :integer, display: true,
           validates: { presence: true, numericality: { only_integer: true } }
     field :preset_install_limited, default: builtin_install_limited, type: :array, display: true,
           validates: { json: { format: :array, value_allow_empty: true } }
   end
 
   scope :switch_mode do
-    field :registrations_enabled, default: to_bool(ENV['ZEALOT_REGISTER_ENABLED'] || 'true'),
+    field :registrations_enabled, default: to_bool(ENV['APPDOCK_REGISTER_ENABLED'] || 'true'),
           type: :boolean, display: true
-    field :login_enabled, default: to_bool(ENV['ZEALOT_LOGIN_ENABLED'] || 'true'),
+    field :login_enabled, default: to_bool(ENV['APPDOCK_LOGIN_ENABLED'] || 'true'),
           type: :boolean, display: true
     field :passwordless_login_enabled, type: :hash, display: true, restart_required: true, default: {
-      enabled: to_bool(ENV['ZEALOT_PASSWORDLESS_LOGIN_ENABLED'] || 'false'),
-      token_expiry_in_minutes: (ENV['ZEALOT_PASSWORDLESS_TOKEN_EXPIRY_MINUTES'] || '20').to_i
+      enabled: to_bool(ENV['APPDOCK_PASSWORDLESS_LOGIN_ENABLED'] || 'false'),
+      token_expiry_in_minutes: (ENV['APPDOCK_PASSWORDLESS_TOKEN_EXPIRY_MINUTES'] || '20').to_i
     }, validates: { json: { format: :hash } }
-    field :guest_mode, default: to_bool(ENV['ZEALOT_GUEST_MODE'] || 'false'),
+    field :guest_mode, default: to_bool(ENV['APPDOCK_GUEST_MODE'] || 'false'),
           type: :boolean, restart_required: true, display: true
-    field :keep_uploads, default: to_bool(ENV['ZEALOT_KEEP_UPLOADS'] || 'true'),
+    field :keep_uploads, default: to_bool(ENV['APPDOCK_KEEP_UPLOADS'] || 'true'),
           type: :boolean, restart_required: true, display: true
-    field :demo_mode, default: to_bool(ENV['ZEALOT_DEMO_MODE'] || 'false'),
+    field :demo_mode, default: to_bool(ENV['APPDOCK_DEMO_MODE'] || 'false'),
           type: :boolean, readonly: true, display: true
   end
 
@@ -137,9 +137,9 @@ class Setting < RailsSettings::Base
   end
 
   scope :information do
-    field :version, default: Zealot::Application::VERSION, type: :string, readonly: true
-    field :vcs_ref, default: (ENV['ZEALOT_VCS_REF'] || ENV['HEROKU_SLUG_COMMIT']), type: :string, readonly: true
-    field :build_date, default: (ENV['ZEALOT_BUILD_DATE'] || ENV['HEROKU_RELEASE_CREATED_AT']),
+    field :version, default: AppDock::Application::VERSION, type: :string, readonly: true
+    field :vcs_ref, default: (ENV['APPDOCK_VCS_REF'] || ENV['HEROKU_SLUG_COMMIT']), type: :string, readonly: true
+    field :build_date, default: (ENV['APPDOCK_BUILD_DATE'] || ENV['HEROKU_RELEASE_CREATED_AT']),
           type: :string, readonly: true
   end
 
@@ -158,9 +158,9 @@ class Setting < RailsSettings::Base
   # misc settings
   scope :misc do
     field :show_footer_version, type: :boolean, display: true,
-      default: to_bool(ENV['ZEALOT_SHOW_FOOTER_VERSION'] || 'true')
+      default: to_bool(ENV['APPDOCK_SHOW_FOOTER_VERSION'] || 'true')
     field :show_footer_openapi_endpoints, type: :boolean, restart_required: true, display: true,
-      default: to_bool(ENV['ZEALOT_SHOW_FOOTER_OPENAPI_ENDPOINTS'] || 'false')
+      default: to_bool(ENV['APPDOCK_SHOW_FOOTER_OPENAPI_ENDPOINTS'] || 'false')
   end
 
   # Backup settings1

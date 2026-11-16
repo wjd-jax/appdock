@@ -4,5 +4,5 @@ https://{$ZEALOT_DOMAIN} {
     header X-Robots-Tag "noindex, nofollow"
     @private_files path_regexp ^/(?:uploads/apps/a[0-9]+/r[0-9]+/binary/|uploads/debug_files/|backup/)
     respond @private_files 404
-    reverse_proxy zealot:80
+    reverse_proxy appdock:80
 }

@@ -128,7 +128,7 @@ class Admin::SystemInfoController < ApplicationController
       os_info: Etc.uname.values.join(' '),
       pg_version: pg_version,
       ruby_version: RUBY_DESCRIPTION,
-      zealot_vcs_ref: Setting.vcs_ref,
+      appdock_vcs_ref: Setting.vcs_ref,
       build_date: Setting.build_date,
       cpu: cpu&.length,
       memory: memory,

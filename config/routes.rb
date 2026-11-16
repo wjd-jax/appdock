@@ -200,7 +200,7 @@ Rails.application.routes.draw do
 
       resources :services, only: [] do
         collection do
-          # zealot service
+          # appdock service
           post :restart
           get :status
           # smtp

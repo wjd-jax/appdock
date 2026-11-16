@@ -51,7 +51,7 @@ class UdidController < ApplicationController
     name = device_params[:name]
     udid = device_params[:udid]
     platform = device_params[:platform].downcase.include?('iphone') ? 'IOS' : 'MAC_OS'
-    name = [ 'Zealot', platform, SecureRandom.hex(4) ].compact.join('-') if name.blank? # Max 50 chars
+    name = [ 'AppDock', platform, SecureRandom.hex(4) ].compact.join('-') if name.blank? # Max 50 chars
 
     new_device = apple_key.register_device(udid, name, platform)
     if new_device.errors.present?

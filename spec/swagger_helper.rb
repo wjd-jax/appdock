@@ -8,7 +8,7 @@ RSpec.configure do |config|
     "v1/swagger_#{I18n.default_locale}.json" => {
       openapi: '3.1.0',
       info: {
-        title: 'Zealot API',
+        title: 'AppDock API',
         version: 'v1.4',
         description: I18n.t('api.info.description')
       },
@@ -159,8 +159,8 @@ RSpec.configure do |config|
             type: :object,
             properties: {
               version: { type: :integer, format: :int32, example: 100 },
-              app_name: { type: :string, example: 'Zealot' },
-              bundle_id: { type: :string, example: 'im.ews.zealot' },
+              app_name: { type: :string, example: 'AppDock' },
+              bundle_id: { type: :string, example: 'im.ews.appdock' },
               source: { type: :string, example: 'API' },
               branch: { type: :string, example: 'develop' },
               git_commit: { type: :string, example: 'bc58e308dd1caf2226a402291839afbbdabcabf0' },
@@ -223,7 +223,7 @@ RSpec.configure do |config|
               id: { type: :integer, format: :int32, example: 100 },
               category: { type: :string, example: 'Proguard' },
               uuid: { type: :string, example: '2364df02-a44e-4859-9ea1-de25c93d54d5' },
-              package_name: { type: :string, example: 'im.ews.zealot.android.example' },
+              package_name: { type: :string, example: 'im.ews.appdock.android.example' },
               files: { type: :array, items: { '$ref': '#/components/schemas/MetadataProguardFile' }},
               created_at: { type: :date, example: '2024-03-01 12:00:21 +0800' }
             }
@@ -243,7 +243,7 @@ RSpec.configure do |config|
               id: { type: :integer, format: :int32, example: 200 },
               category: { type: :string, example: 'dSYM' },
               uuid: { type: :string, example: '2364df02-a44e-4859-9ea1-de25c93d54d5' },
-              bundle_id: { type: :string, example: 'im.ews.zealot.iphone.example' },
+              bundle_id: { type: :string, example: 'im.ews.appdock.iphone.example' },
               name: { type: :string, example: 'ExampleApp' },
               extension: { type: :boolean, example: false },
               size: { type: :integer, example: 32048613 },

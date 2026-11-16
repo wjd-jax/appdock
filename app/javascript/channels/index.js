@@ -1,6 +1,6 @@
 import * as ActionCable from "@rails/actioncable"
-import { Zealot } from "../controllers/zealot"
+import { AppDock } from "../controllers/appdock"
 
-if (Zealot.isDevelopment) {
+if (AppDock.isDevelopment) {
   ActionCable.logger.enabled = true
 }

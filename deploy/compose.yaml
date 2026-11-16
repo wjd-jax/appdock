@@ -1,21 +1,21 @@
-name: zealot
+name: appdock
 
 services:
   postgres:
     image: postgres:14-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: ${ZEALOT_POSTGRES_PASSWORD:?set in .env}
-      POSTGRES_DB: zealot
+      POSTGRES_PASSWORD: ${APPDOCK_POSTGRES_PASSWORD:-${ZEALOT_POSTGRES_PASSWORD:?set in .env}}
+      POSTGRES_DB: appdock
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d zealot"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d appdock"]
       interval: 10s
       timeout: 5s
       retries: 10
 
-  zealot:
+  appdock:
     image: appdock:local
     build:
       context: ..
@@ -27,18 +27,18 @@ services:
     env_file: .env
     environment:
       RAILS_ENV: production
-      ZEALOT_POSTGRES_HOST: postgres
-      ZEALOT_POSTGRES_PORT: 5432
-      ZEALOT_POSTGRES_USERNAME: postgres
-      ZEALOT_POSTGRES_DB_NAME: zealot
-      ZEALOT_DOMAIN: ${ZEALOT_DOMAIN:?set in .env}
-      ZEALOT_TRUSTED_LAN: "true"
-      ZEALOT_SKIP_SAMPLE_DATE: "true"
-      ZEALOT_GUEST_MODE: "false"
-      ZEALOT_REGISTER_ENABLED: "false"
-      ZEALOT_LOGIN_ENABLED: "true"
-      ZEALOT_PASSWORDLESS_LOGIN_ENABLED: "false"
-      ZEALOT_SENTRY_DISABLE: "true"
+      APPDOCK_POSTGRES_HOST: postgres
+      APPDOCK_POSTGRES_PORT: 5432
+      APPDOCK_POSTGRES_USERNAME: postgres
+      APPDOCK_POSTGRES_DB_NAME: appdock
+      APPDOCK_DOMAIN: ${APPDOCK_DOMAIN:-${ZEALOT_DOMAIN:?set in .env}}
+      APPDOCK_TRUSTED_LAN: "true"
+      APPDOCK_SKIP_SAMPLE_DATE: "true"
+      APPDOCK_GUEST_MODE: "false"
+      APPDOCK_REGISTER_ENABLED: "false"
+      APPDOCK_LOGIN_ENABLED: "true"
+      APPDOCK_PASSWORDLESS_LOGIN_ENABLED: "false"
+      APPDOCK_SENTRY_DISABLE: "true"
     volumes:
       - ./data/uploads:/app/public/uploads
       - ./data/backup:/app/public/backup
@@ -53,10 +53,10 @@ services:
   web:
     image: caddy:2.11.9
     environment:
-      ZEALOT_DOMAIN: ${ZEALOT_DOMAIN:?set in .env}
+      APPDOCK_DOMAIN: ${APPDOCK_DOMAIN:-${ZEALOT_DOMAIN:?set in .env}}
     restart: unless-stopped
     depends_on:
-      zealot:
+      appdock:
         condition: service_healthy
     ports:
       - "80:80"

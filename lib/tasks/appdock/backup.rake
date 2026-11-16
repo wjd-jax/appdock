@@ -33,32 +33,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# require_relative '../../zealot/backup/helper'
+# require_relative '../../appdock/backup/helper'
 
-# extend Zealot::Backup::Helper
+# extend AppDock::Backup::Helper
 
-# namespace :zealot do
+# namespace :appdock do
 #   namespace :backup do
-#     desc 'Zealot | Backup | Create a backup of the Zealot system'
+#     desc 'AppDock | Backup | Create a backup of the AppDock system'
 #     task create: :environment do
-#       Rake::Task['zealot:backup:db:create'].invoke
-#       Rake::Task['zealot:backup:uploads:create'].invoke
+#       Rake::Task['appdock:backup:db:create'].invoke
+#       Rake::Task['appdock:backup:uploads:create'].invoke
 
-#       backup = Zealot::Backup::Manager.new
+#       backup = AppDock::Backup::Manager.new
 #       backup.write_info
 #       backup.pack
 #       backup.cleanup
 #       backup.remove_old
 #     end
 
-#     desc 'Zealot | Backup | Restore a previously created backup'
+#     desc 'AppDock | Backup | Restore a previously created backup'
 #     task restore: :environment do
-#       backup = Zealot::Backup::Manager.new
+#       backup = AppDock::Backup::Manager.new
 #       cleanup_required = backup.unpack
 #       backup.verify_backup_version
 
-#       Rake::Task['zealot:backup:db:restore'].invoke
-#       Rake::Task['zealot:backup:uploads:restore'].invoke
+#       Rake::Task['appdock:backup:db:restore'].invoke
+#       Rake::Task['appdock:backup:uploads:restore'].invoke
 
 #       backup.cleanup if cleanup_required
 
@@ -67,21 +67,21 @@
 
 #     namespace :uploads do
 #       task create: :environment do
-#         Zealot::Backup::Uploads.dump
+#         AppDock::Backup::Uploads.dump
 #       end
 
 #       task restore: :environment do
-#         Zealot::Backup::Uploads.restore
+#         AppDock::Backup::Uploads.restore
 #       end
 #     end
 
 #     namespace :db do
 #       task create: :environment do
-#         Zealot::Backup::Database.dump
+#         AppDock::Backup::Database.dump
 #       end
 
 #       task restore: :environment do
-#         Zealot::Backup::Database.restore
+#         AppDock::Backup::Database.restore
 #       end
 #     end
 #   end

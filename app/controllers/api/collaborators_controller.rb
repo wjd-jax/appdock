@@ -15,7 +15,7 @@ class Api::CollaboratorsController < Api::BaseController
   # POST /api/apps/:app_id/collaborators
   def create
     collaborator = @app.collaborators.find_by(user_id: params[:user_id])
-    raise Zealot::Error::RecordExisted.new(model: collaborator) if collaborator
+    raise AppDock::Error::RecordExisted.new(model: collaborator) if collaborator
 
     @collaborator = @app.collaborators.create!(collaborator_params)
     render json: @collaborator, status: :created

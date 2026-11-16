@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-module Zealot::Backup
+module AppDock::Backup
   class Error < StandardError; end
   class DatabaseError < Error; end
   class UploadsError < Error; end
@@ -28,22 +28,22 @@ module Zealot::Backup
   class RestoreDatabaseError < DatabaseError; end
 
   class Manager
-    include Zealot::Backup::Helper
+    include AppDock::Backup::Helper
 
-    TEMPDIR_PREFIX = 'zealot-backup'
+    TEMPDIR_PREFIX = 'appdock-backup'
     DEFAULT_BACKUP_PATH = 'public/backup'
 
-    ARCHIVES_TO_BACKUP = [ Zealot::Backup::Uploads::FILENAME ]
-    FOLDERS_TO_BACKUP = [ Zealot::Backup::Database::FILENAME ]
-    FILENAME_SUFFIX = '_zealot_backup.tar'
+    ARCHIVES_TO_BACKUP = [ AppDock::Backup::Uploads::FILENAME ]
+    FOLDERS_TO_BACKUP = [ AppDock::Backup::Database::FILENAME ]
+    FILENAME_SUFFIX = '_appdock_backup.tar'
 
     # For compatibility, there are 5 names the backups can have:
-    # - 1590060675_2020_05_21_zealot_backup.tar
-    # - 1590060675_2020_05_21_development_zealot_backup.tar
-    # - 1590060675_2020_05_21_4.0.0-beta4_zealot_backup.tar
-    # - 1590060675_2020_05_21_4.0.0-beta4-development_zealot_backup.tar
-    # - 1590060675_20220809-1122_4.0.0-beta4-development_zealot_backup.tar
-    FILE_REGEX = /^(\d{10})?(_*)(\d{4}_\d{2}_\d{2}|\d{8}-\d{4})(_\d+\.\d+\.\d+((-|\.)(beta\d|pre\d|rc\d)?)?)?([_-]development)?_zealot_backup\.tar$/
+    # - 1590060675_2020_05_21_appdock_backup.tar
+    # - 1590060675_2020_05_21_development_appdock_backup.tar
+    # - 1590060675_2020_05_21_4.0.0-beta4_appdock_backup.tar
+    # - 1590060675_2020_05_21_4.0.0-beta4-development_appdock_backup.tar
+    # - 1590060675_20220809-1122_4.0.0-beta4-development_appdock_backup.tar
+    FILE_REGEX = /^(\d{10})?(_*)(\d{4}_\d{2}_\d{2}|\d{8}-\d{4})(_\d+\.\d+\.\d+((-|\.)(beta\d|pre\d|rc\d)?)?)?([_-]development)?_(?:appdock|zealot)_backup\.tar$/
 
     attr_reader :backup_path, :logger
 
@@ -68,18 +68,18 @@ module Zealot::Backup
       if !force && File.file?(tar_file)
         key = File.basename(@backup_path)
         file = File.basename(tar_file)
-        raise Zealot::Backup::Error, "`#{key}` backup file was existed: #{file}, set force: true to overwrite."
+        raise AppDock::Backup::Error, "`#{key}` backup file was existed: #{file}, set force: true to overwrite."
       end
     end
 
     # dump database into archive file
     def dump_database
-      Zealot::Backup::Database.dump(self)
+      AppDock::Backup::Database.dump(self)
     end
 
     # dump uploads of given app into archive file
     def dump_uploads(app_ids: :all)
-      Zealot::Backup::Uploads.dump(self, app_ids: app_ids)
+      AppDock::Backup::Uploads.dump(self, app_ids: app_ids)
     end
 
     # generate a backup information file
@@ -101,7 +101,7 @@ module Zealot::Backup
         # Set file permissions on open to prevent chmod races.
         tar_system_options = { out: [tar_file, 'w', 0640] }
         unless system(tar, '-cf', '-', *backup_contents, tar_system_options)
-          raise Zealot::Backup::Error, "Backup failed: creating archive #{tar_file} failed"
+          raise AppDock::Backup::Error, "Backup failed: creating archive #{tar_file} failed"
         end
       end
     end
@@ -142,8 +142,8 @@ module Zealot::Backup
     def tar_filename
       @tar_filename ||= -> () {
         timestamp = backup_information[:backup_created_at].strftime('%s_%Y%m%d-%H%M')
-        zealot_version = backup_information[:zealot_version]
-        "#{timestamp}_#{zealot_version}#{FILENAME_SUFFIX}"
+        appdock_version = backup_information[:appdock_version]
+        "#{timestamp}_#{appdock_version}#{FILENAME_SUFFIX}"
       }.call
     end
 
@@ -194,7 +194,7 @@ module Zealot::Backup
     #       # print list of available backups
     #       logger.debug " " + available_timestamps.join("\n ")
     #       logger.debug 'Please specify which one you want to restore:'
-    #       logger.debug 'rake zealot:backup:restore BACKUP=timestamp_of_backup'
+    #       logger.debug 'rake appdock:backup:restore BACKUP=timestamp_of_backup'
     #       exit 1
     #     end
 
@@ -218,17 +218,17 @@ module Zealot::Backup
     #   Dir.chdir(path) do
     #     # restoring mismatching backups can lead to unexpected problems
     #     current_version = Setting.version
-    #     if settings[:zealot_version] != current_version
+    #     if settings[:appdock_version] != current_version
     #       logger.debug(<<~HEREDOC.color(:red))
-    #         Zealot version mismatch:
-    #           Your current Zealot version (#{current_version}) differs from the Zealot version in the backup!
+    #         AppDock version mismatch:
+    #           Your current AppDock version (#{current_version}) differs from the AppDock version in the backup!
     #           Please switch to the following version and try again:
-    #           version: #{settings[:zealot_version]}
+    #           version: #{settings[:appdock_version]}
     #       HEREDOC
     #       logger.debug
     #       logger.debug "Hint:"
-    #       logger.debug "  1. git checkout v#{settings[:zealot_version]}"
-    #       logger.debug "  2. docker pull tryzealot/zealot:#{settings[:zealot_version]}"
+    #       logger.debug "  1. git checkout v#{settings[:appdock_version]}"
+    #       logger.debug "  2. docker pull tryzealot/zealot:#{settings[:appdock_version]}"
     #       exit 1
     #     end
     #   end
@@ -236,7 +236,7 @@ module Zealot::Backup
 
     def backup_information
       @backup_information ||= {
-        zealot_version: Setting.version,
+        appdock_version: Setting.version,
         backup_created_at: Time.now,
         db_version: ActiveRecord::Migrator.current_version.to_s,
         tar_version: tar_version,

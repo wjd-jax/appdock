@@ -20,13 +20,13 @@ require 'action_cable/engine'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module Zealot
+module AppDock
   class Application < Rails::Application
     VERSION = '6.2.2'
 
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
-    config.middleware.insert_before 0, AppdockPublicGateway
+    config.middleware.insert_before 0, AppDockPublicGateway
 
     # Set default timezone
     config.time_zone = ENV['TIME_ZONE'] || 'Asia/Shanghai'
@@ -44,7 +44,7 @@ module Zealot
 
     # Action mailer settings.
     config.action_mailer.default_options = {
-      from: ENV['ACTION_MAILER_DEFAULT_FROM'] || 'Zealot'
+      from: ENV['ACTION_MAILER_DEFAULT_FROM'] || 'AppDock'
     }
 
     # Set the back-end for the cache.

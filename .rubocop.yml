@@ -39,7 +39,7 @@ Layout/LineLength:
   Exclude:
     - 'config/**/*.rb'
     - 'spec/**/*.rb'
-    - lib/zealot/backup/manager.rb
+    - lib/appdock/backup/manager.rb
     - app/services/create_sample_apps_service.rb
 
 Metrics/MethodLength:

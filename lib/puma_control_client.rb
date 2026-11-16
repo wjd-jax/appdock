@@ -5,7 +5,7 @@ require 'faraday'
 class PumaControlClient
   def initialize(url = nil, token: nil)
     @uri ||= ENV.fetch('PUMA_CONTROL_URL') { '0.0.0.0:9293' }
-    @token ||= ENV.fetch('PUMA_CONTROL_URL_TOKEN') { 'zealot' }
+    @token ||= ENV.fetch('PUMA_CONTROL_URL_TOKEN') { 'appdock' }
   end
 
   def stats

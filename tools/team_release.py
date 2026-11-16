@@ -100,7 +100,7 @@ def run(argv=None):
         print(json.dumps({'created':str(p),'next':'核对构建命令和产物路径，再执行 release'},ensure_ascii=False))
         return
     cfg=config(args.config)
-    token=os.environ.get('ZEALOT_TOKEN','').strip()
+    token=os.environ.get('APPDOCK_TOKEN',os.environ.get('ZEALOT_TOKEN','')).strip()
     endpoint=args.endpoint or cfg.get('endpoint','https://apps.example.com')
     channel=args.channel_key or ''
     if channel.startswith('请'): channel=''
@@ -110,6 +110,7 @@ def run(argv=None):
         if not isinstance(command,list) or not command or not all(isinstance(x,str) for x in command):
             raise ReleaseError('build 必须是非空命令数组，请配置项目实际构建命令')
         build_env=os.environ.copy()
+        build_env.pop('APPDOCK_TOKEN',None)
         build_env.pop('ZEALOT_TOKEN',None)
         result=subprocess.run(command, env=build_env, stdout=sys.stderr, stderr=sys.stderr)
         if result.returncode: raise ReleaseError(f'构建失败，退出码 {result.returncode}，未上传')

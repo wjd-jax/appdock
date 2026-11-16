@@ -171,7 +171,7 @@ en:
       archives: Archive uploaded binaries
       keep_uploads: Keep all builds
       misc: Misc
-      show_footer_version: Show Zealot version information in the footer.
+      show_footer_version: Show AppDock version information in the footer.
       show_footer_openapi_endpoints: Show OpenAPI documentation endpoints in the footer.
       empty_value: Empty
       no_editable_key: Read only
@@ -180,7 +180,7 @@ en:
       title: System information
       index:
         title: :admin.system_info.title
-        zealot_version: Version
+        appdock_version: Version
         vcs_ref: Git Ref
         build_date: Build date
         server_info: Server info
@@ -206,7 +206,7 @@ en:
         new_version: "A new update is available "
         dev_new_version: Found new version (dev mode)
         messages:
-          file_permissions_tip: If you see a warning icon in the list above it means that the paths are not writable, which may cause Zealot to be unavailable or abnormal.
+          file_permissions_tip: If you see a warning icon in the list above it means that the paths are not writable, which may cause AppDock to be unavailable or abnormal.
           path_not_exist: Path does not exist
           path_not_writable: Path is not writable
           path_not_readable: Path is not readable
@@ -251,7 +251,7 @@ en:
           pack: Packing
           remove_old: Remove old backups
           cleanup: Clean up
-        unknown_job_status: Unknown happened! Try again or report to zealot developer please.
+        unknown_job_status: Unknown happened! Try again or report to appdock developer please.
         not_found:
           title: Not found any backup file
           body_html: Click the button to <i class="fa-regular fa-play-circle"></i> new a backup file.
@@ -1107,7 +1107,7 @@ en:
   user_mailer:
     omniauth_welcome_email:
       subject: Welcome to %{title}
-      default_password: "You authorized the third-party service to register Zealot, Here is the password:"
+      default_password: "You authorized the third-party service to register AppDock, Here is the password:"
   devise:
     confirmations:
       new:

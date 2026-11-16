@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Zealot::GoodjobHealthCheck
+class AppDock::GoodjobHealthCheck
   extend BaseHealthCheck
 
   def self.check

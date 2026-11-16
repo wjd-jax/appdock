@@ -79,7 +79,7 @@ Rails.application.configure do
     config.action_mailer.smtp_settings = {
       address:              ENV['SMTP_ADDRESS'],
       port:                 ENV['SMTP_PORT'].to_i,
-      domain:               ENV['SMTP_DOMAIN'] || ENV['ZEALOT_DOMAIN'],
+      domain:               ENV['SMTP_DOMAIN'] || ENV['APPDOCK_DOMAIN'],
       user_name:            ENV['SMTP_USERNAME'].presence,
       password:             ENV['SMTP_PASSWORD'].presence,
       authentication:       ENV['SMTP_AUTH_METHOD'] == 'none' ? nil : ENV['SMTP_AUTH_METHOD'].presence || 'plain',
@@ -118,5 +118,5 @@ Rails.application.configure do
   #   end
   # end
 
-  # config.hosts << ENV['ZEALOT_DOMAIN'] if ENV['ZEALOT_DOMAIN']
+  # config.hosts << ENV['APPDOCK_DOMAIN'] if ENV['APPDOCK_DOMAIN']
 end

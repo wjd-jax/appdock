@@ -6,7 +6,7 @@ Rails.configuration.to_prepare do
 
   # Configure ActionCable request protection
   Rails.application.configure do
-    if ENV.fetch('ZEALOT_DISABLE_CABLE_REQUEST_PROTECTION') { 'false' } == 'true'
+    if ENV.fetch('APPDOCK_DISABLE_CABLE_REQUEST_PROTECTION') { 'false' } == 'true'
       config.action_cable.disable_request_forgery_protection = true
     else
       config.action_mailer.default_url_options = url_options

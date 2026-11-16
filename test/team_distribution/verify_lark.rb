@@ -1,5 +1,5 @@
 require 'action_dispatch/testing/integration'
-raise 'Isolation required' unless ActiveRecord::Base.connection_db_config.database == 'zealot_verify'
+raise 'Isolation required' unless ActiveRecord::Base.connection_db_config.database == 'appdock_verify'
 def check(label)
   raise label unless yield
   puts "PASS #{label}"
@@ -92,3 +92,5 @@ s.post('/notifications/test',params:{authenticity_token:token})
 check('test via page'){s.response.status==302}
 s.get('/notifications');check('saved enabled state and test result'){s.response.body.include?('自动通知已开启') && s.response.body.include?('测试消息已发送')}
 puts 'All isolated Lark checks passed (HTTP mocked; no external messages)'
+
+service.save!({enabled: '0'}) # Leave the isolated fixture unable to send later.

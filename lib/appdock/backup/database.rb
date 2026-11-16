@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-module Zealot::Backup
+module AppDock::Backup
   class Database
-    include Zealot::Backup::Helper
+    include AppDock::Backup::Helper
 
     def self.dump(manager)
       new(manager.tmpdir, logger: manager.logger).dump
@@ -75,7 +75,7 @@ module Zealot::Backup
       end
 
       unless success
-        raise Zealot::Backup::DumpDatabaseError, exit_message.join(', ')
+        raise AppDock::Backup::DumpDatabaseError, exit_message.join(', ')
       end
 
       success
@@ -107,7 +107,7 @@ module Zealot::Backup
       end
 
       unless success
-        raise Zealot::Backup::RestoreDatabaseError, exit_message.join(', ')
+        raise AppDock::Backup::RestoreDatabaseError, exit_message.join(', ')
       end
 
       success

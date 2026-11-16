@@ -1,15 +1,16 @@
 import { Controller } from "@hotwired/stimulus"
 import { compare } from "compare-versions"
+import { AppDock } from "../appdock"
 
-const PROJECT_URL = "https://github.com/tryzealot/zealot"
-const VERSION_URL = "https://api.github.com/repos/tryzealot/zealot/releases/latest"
+const PROJECT_URL = "https://github.com/wjd-jax/appdock"
+const VERSION_URL = "https://api.github.com/repos/wjd-jax/appdock/releases/latest"
 
 export default class extends Controller {
   static values = { version: String, title: String }
   static targets = ["newVersion"]
 
   connect() {
-    if (Zealot.isDevelopment()) {
+    if (AppDock.isDevelopment()) {
       this.render(this.titleValue, PROJECT_URL)
     } else {
       this.check()
@@ -24,6 +25,7 @@ export default class extends Controller {
     }).then((response) => response.json())
       .then((json) => {
         const releaseVersion = json.tag_name
+        if (!releaseVersion) { return }
         if (compare(releaseVersion, this.versionValue, "<=")) { return }
         const releaseLink = json.html_url
         const title = this.titleValue + " " + releaseVersion

@@ -4,7 +4,7 @@ require 'json'
 require 'yaml'
 require 'zip'
 require 'nokogiri'
-raise 'Isolated verification database required' unless ActiveRecord::Base.connection_db_config.database == 'zealot_verify'
+raise 'Isolated verification database required' unless ActiveRecord::Base.connection_db_config.database == 'appdock_verify'
 Rails.application.executor.run!
 class DeveloperSetupSession < ActionDispatch::Integration::Session
   def process(*args, **kwargs)

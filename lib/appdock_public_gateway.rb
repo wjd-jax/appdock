@@ -1,5 +1,5 @@
 # The public listener goes directly to Rails, never the container static file server.
-class AppdockPublicGateway
+class AppDockPublicGateway
   ALLOWED = {
     'distribution/catalog' => %w[index icon],
     'distribution/app_downloads' => %w[show qrcode],
