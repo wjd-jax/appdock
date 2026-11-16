@@ -36,6 +36,7 @@ class Channel < ApplicationRecord
 
   validates :name, presence: true
   validates :slug, uniqueness: true
+  validate :slug_not_used_by_distribution_product
   validates :device_type, presence: true, inclusion: { in: self.device_types.keys }
   validates :download_filename_type, presence: true, inclusion: { in: self.download_filename_types.keys }
 
@@ -142,6 +143,11 @@ class Channel < ApplicationRecord
   end
 
   private
+
+  def slug_not_used_by_distribution_product
+    return if slug.blank? || !App.column_names.include?('distribution_slug')
+    errors.add(:slug, '已被产品下载链接使用') if App.exists?(distribution_slug: slug.downcase)
+  end
 
   def recommended_release_belongs_here
     return unless recommended_release

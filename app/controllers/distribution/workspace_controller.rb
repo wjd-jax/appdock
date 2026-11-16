@@ -11,6 +11,9 @@ module Distribution
     def index
       @apps = App.active.order(created_at: :desc).select { |app| AppPolicy.new(current_user, app).show? }
       @downloads = @apps.to_h { |app| [app.id, Distribution::AppDownloads.new(app).latest] }
+      @download_counts = Release.joins(channel: :scheme).unscope(:order)
+                                .where(schemes: {app_id: @apps.map(&:id)})
+                                .group('schemes.app_id').sum(:download_count)
     end
   end
 end

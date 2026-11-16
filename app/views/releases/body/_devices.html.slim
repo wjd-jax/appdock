@@ -10,7 +10,8 @@
             i.fa-solid.fa-info-circle
           .dropdown-menu.dropdown-menu-right
             small.dropdown-item
-              = raw t('releases.show.sync_devices_feature', link: link_to(t('admin.apple_keys.title'), t('releases.show.apple_team_link'), target: '_blank'))
+              - apple_keys_entry = current_user&.admin? ? link_to(t('admin.apple_keys.title'), admin_apple_keys_path) : t('admin.apple_keys.title')
+              = raw t('releases.show.sync_devices_feature', link: apple_keys_entry)
 
           button.btn.btn-tool data-lte-toggle="card-collapse"
             i.fa-solid.fa-plus data-lte-icon="expand"

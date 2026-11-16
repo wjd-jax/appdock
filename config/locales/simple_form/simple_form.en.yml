@@ -122,7 +122,7 @@ en:
         git_commit: 40 bit length SHA value of git commit
         ci_url: The CI URL specific like Jenkins, Gitlab CI, Github Action etc
       web_hook:
-        body: Custom JSON struct body to apply the third party notification services. Use <a href="https://zealot.ews.im/docs/user-guide/webhooks">default structure</a> by leave it empty
+        body: Custom JSON body for third-party notifications. Leave blank to use the default structure.
       debug_file:
         device_type: Which device type of app. for example, iOS, Android, macOS etc
         file: Zip compressed file required

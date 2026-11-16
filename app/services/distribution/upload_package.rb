@@ -25,6 +25,10 @@ module Distribution
       channel = Channel.find_by!(key: @params[:channel_key]) if @params[:channel_key].present?
       Pundit.authorize(@user, channel, :update?) if channel
       raise InvalidPackage, '应用已归档' if channel&.app&.archived?
+      business_environment = @params[:business_environment] || 'testing'
+      unless TeamRelease::BUSINESS_ENVIRONMENTS.key?(business_environment)
+        raise InvalidPackage, '包环境只能选择测试环境或正式环境'
+      end
       sha = Digest::SHA256.file(upload.path).hexdigest
       parser = AppInfo.parse(upload.path)
       result = nil
@@ -36,12 +40,15 @@ module Distribution
           Pundit.authorize(@user, channel, :update?)
         end
         channel.lock!
-        existing = channel.releases.where.not(distribution_status: 'retired').where(file_sha256: sha).order(id: :desc).detect(&:file?)
+        existing = channel.releases.where.not(distribution_status: 'retired')
+                          .where(file_sha256: sha, business_environment: business_environment)
+                          .order(id: :desc).detect(&:file?)
         if existing && @params[:allow_duplicate].to_s != 'true'
           result = Result.new(release: existing, duplicate: true)
         else
           permitted = @params.permit(:file, :changelog, :release_type, :branch, :git_commit, :ci_url, :custom_fields, :release_version, :build_version)
           release = channel.releases.upload_file(permitted, parser: parser, source: @source)
+          release.business_environment = business_environment
           Pundit.authorize(@user, release, :create?)
           release.file_sha256 = sha
           release.save!
@@ -67,10 +74,6 @@ module Distribution
       raise InvalidPackage, '请上传 iOS 或 Android 安装包' unless %w[ios android].include?(device)
       name = @params[:name].presence || parser.name.presence || parser.bundle_id
       app = App.active.find_or_initialize_by(name: name)
-      # Same display name with another package on the same platform is a separate app.
-      if app.persisted? && Channel.where(scheme_id: app.schemes.select(:id), device_type: device).exists?
-        app = App.active.find_or_initialize_by(name: "#{name} · #{parser.bundle_id}")
-      end
       if app.new_record?
         Pundit.authorize(@user, app, :create?)
         app.save!
@@ -81,11 +84,10 @@ module Distribution
       scheme = app.schemes.find_or_initialize_by(name: '内部测试')
       Pundit.authorize(@user, scheme, :create?)
       scheme.save! if scheme.new_record?
-      channel = scheme.channels.find_or_initialize_by(device_type: device)
+      channel = scheme.channels.find_or_initialize_by(device_type: device, bundle_id: Regexp.escape(parser.bundle_id.to_s))
       Pundit.authorize(@user, channel, :create?)
       if channel.new_record?
         channel.name = device == 'ios' ? 'iOS' : 'Android'
-        channel.bundle_id = Regexp.escape(parser.bundle_id.to_s)
         channel.save!
       end
       channel

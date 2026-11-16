@@ -87,9 +87,9 @@ module Distribution
         if shortened
           elements << {tag: 'note', elements: [{tag: 'plain_text', content: '以上为更新摘要，完整记录请查看版本详情。'}]}
         end
-        app_url = Rails.application.routes.url_helpers.distribution_app_url(release.channel.app)
+        package_url = Distribution::AppDownloads.new(release.app).package_url(release)
         elements << {tag: 'action', actions: [
-          {tag: 'button', text: {tag: 'plain_text', content: '下载并安装'}, type: 'primary', url: app_url},
+          {tag: 'button', text: {tag: 'plain_text', content: '下载并安装'}, type: 'primary', url: package_url},
           {tag: 'button', text: {tag: 'plain_text', content: '完整更新记录'}, type: 'default', url: release.release_url}
         ]}
       else

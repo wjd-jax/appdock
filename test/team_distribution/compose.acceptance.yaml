@@ -15,6 +15,6 @@ services:
     environment:
       RAILS_SERVE_STATIC_FILES: "true"
       APPDOCK_POSTGRES_DB_NAME: appdock_verify
-      APPDOCK_DOMAIN: apps.example.com:18443
+      APPDOCK_DOMAIN: ${APPDOCK_ACCEPTANCE_DOMAIN:-apps.example.com:18443}
     volumes:
       - ../../checks:/checks:ro

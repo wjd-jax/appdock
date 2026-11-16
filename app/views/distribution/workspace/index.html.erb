@@ -1,5 +1,56 @@
 <% content_for :title, '我的应用' %>
-<div class="workspace-tools"><h1>我的应用</h1><input class="app-search" id="app-search" type="search" placeholder="输入名称搜索" aria-label="搜索应用"></div>
+<div class="workspace-tools">
+  <h1>我的应用</h1>
+  <input class="app-search" id="app-search" type="search" placeholder="输入名称搜索" aria-label="搜索应用">
+</div>
 <div class="workspace-note">团队内部应用分发 <span style="float:right">支持 iOS / Android</span></div>
-<div class="app-gallery"><%= render 'distribution/uploads/picker' %><% @apps.each do |app| %><% versions = @downloads.fetch(app.id); r=versions.first %><article class="fir-app" data-app-name="<%= app.name.downcase %>"><span class="app-platform"><%= versions.map { |v| distribution_platform(v) }.join(' / ') %></span><a class="app-icon" href="<%= distribution_manage_app_path(app) %>"><% if r %><%= app_icon(r) %><% end %></a><h2><%= app.name %></h2><dl><dt>下载链接</dt><dd><button class="text-button" style="padding:0;font-size:12px" data-copy="<%= Distribution::AppDownloads.new(app).url %>">复制固定链接</button></dd><dt>Bundle ID</dt><dd><%= r&.bundle_id || '—' %></dd><dt>最新版本</dt><dd><%= r&.release_version.presence || r&.version || '暂无' %><% if r&.build_version.present? %> (Build <%= r.build_version %>)<% end %></dd><dt>更新时间</dt><dd><%= distribution_time(r&.created_at) %></dd></dl><div class="row"><a href="<%= distribution_manage_app_path(app) %>">编辑</a><a href="<%= distribution_app_path(app) %>" target="_blank" rel="noopener">预览</a></div></article><% end %></div>
+<div class="app-gallery">
+  <%= render 'distribution/uploads/picker' %>
+  <% @apps.each do |app| %>
+    <% versions = @downloads.fetch(app.id) %>
+    <% groups = versions.group_by(&:platform) %>
+    <% platforms = groups.keys.sort_by { |platform| [platform == 'iOS' ? 0 : platform == 'Android' ? 1 : 2, platform] } %>
+    <% downloads = Distribution::AppDownloads.new(app) %>
+    <article class="fir-app fir-product-card" data-app-name="<%= app.name.downcase %>">
+      <div class="fir-product-head">
+        <a class="app-icon" href="<%= distribution_manage_app_path(app) %>">
+          <%= app_icon(versions.first) if versions.first %>
+        </a>
+        <div>
+          <h2><%= app.name %></h2>
+          <div class="fir-summary">
+            <a href="<%= downloads.path %>" target="_blank" rel="noopener">产品汇总页 ↗</a>
+            <button class="text-button" type="button" data-copy="<%= downloads.url %>">复制汇总链接</button>
+            <a href="<%= distribution_manage_app_path(app) %>">产品设置</a>
+            <span title="累计文件下载请求次数；不代表安装成功">累计下载 <%= number_with_delimiter(@download_counts.fetch(app.id, 0)) %> 次</span>
+          </div>
+        </div>
+      </div>
+      <div class="fir-platform-list">
+        <% platforms.each do |platform| %>
+          <section class="fir-platform-group" aria-label="<%= platform %> 安装包">
+            <% groups.fetch(platform).each do |release| %>
+              <div class="fir-package">
+                <div class="fir-package-head">
+                  <h3><%= platform %></h3>
+                  <span class="environment-tag" data-business-environment="<%= release.business_environment_key %>"><%= release.business_environment_label %></span>
+                  <a href="<%= distribution_manage_package_path(app, release.platform, release.bundle_id) %>">编辑</a>
+                </div>
+                <p class="fir-package-id" title="<%= release.bundle_id %>"><span>包名：</span><%= release.bundle_id %></p>
+                <p class="fir-package-meta"><span>版本：</span><strong><%= release.release_version.presence || release.version %></strong><% if release.build_version.present? %><span class="fir-package-build">Build <%= release.build_version %></span><% end %></p>
+                <p class="fir-package-meta"><span>更新：</span><%= distribution_time(release.created_at) %></p>
+                <p class="fir-package-meta" title="当前版本的文件下载请求次数；不代表安装成功"><span>当前版本下载：</span><strong><%= number_with_delimiter(release.download_count) %></strong> 次</p>
+                <div class="fir-package-actions">
+                  <a class="fir-package-preview" href="<%= downloads.package_path(release) %>" target="_blank" rel="noopener">预览 ↗</a>
+                  <button class="text-button" type="button" data-copy="<%= downloads.package_url(release) %>" data-copy-feedback="已复制">复制包链接</button>
+                </div>
+              </div>
+            <% end %>
+          </section>
+        <% end %>
+        <% if platforms.empty? %><p class="muted">暂无可用安装包</p><% end %>
+      </div>
+    </article>
+  <% end %>
+</div>
 <div class="workspace-bottom"><a href="<%= distribution_developer_path %>">开发者与 AI 自动上传</a><a href="<%= distribution_operations_path %>">运行状态</a></div>

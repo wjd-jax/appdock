@@ -15,6 +15,7 @@ class Api::Apps::UploadController < Api::BaseController
   # @param name          [String]   optional  name of app
   # @param password      [String]   optional  password to download app
   # @param release_type  [String]   optional  release type(debug, beta, adhoc, release, enterprise etc)
+  # @param business_environment [String] optional testing(default) or production, selected by the uploader
   # @param source        [String]   optional  upload source(api, cli, jenkins, gitlab-ci etc)
   # @param changelog     [String]   optional  changelog
   # @param branch        [String]   optional  git branch

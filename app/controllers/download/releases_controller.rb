@@ -35,6 +35,7 @@ class Download::ReleasesController < ApplicationController
     send_file @release.file.path,
               filename: @release.download_filename,
               disposition: 'attachment'
+    Release.increment_counter(:download_count, @release.id) if request.get?
   end
 
   private

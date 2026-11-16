@@ -67,7 +67,7 @@ def upload(endpoint, token, artifact, fields, retries=2):
             required = ('id', 'release_url', 'qrcode_url')
             if not all(key in result for key in required):
                 raise ReleaseError('服务器响应缺少版本链接字段')
-            return {key: result.get(key) for key in ('id','app_name','release_version','build_version','platform','release_url','qrcode_url','install_url','app_url','environment_url','file_sha256','duplicate')}
+            return {key: result.get(key) for key in ('id','app_name','release_version','build_version','platform','release_url','qrcode_url','install_url','app_url','package_url','package_qrcode_url','environment_url','business_environment','file_sha256','duplicate')}
         except (OSError, http.client.HTTPException) as error:
             if attempt >= retries:
                 raise ReleaseError(f'网络上传失败：{type(error).__name__}；请确认处于公司网络') from None

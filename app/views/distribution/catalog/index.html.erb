@@ -17,19 +17,19 @@
         <div class="catalog-versions">
           <% latest.each do |release| %>
             <div class="catalog-platform">
-              <span class="catalog-platform-name"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 5h4m-3 14h2"/></svg><%= distribution_platform(release) %></span>
+              <span class="catalog-platform-name"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 5h4m-3 14h2"/></svg><%= distribution_platform(release) %> · <%= release.bundle_id %></span>
               <strong><%= release.release_version.presence || release.version %></strong>
               <span class="catalog-build">Build <%= release.build_version.presence || '—' %></span>
-              <span class="catalog-size"><%= number_to_human_size(release.size || 0) %></span>
+              <span class="catalog-size"><%= number_to_human_size(release.size || 0) %></span><a class="text-link" href="<%= Distribution::AppDownloads.new(app).package_path(release) %>">独立链接 →</a>
             </div>
           <% end %>
           <% if latest.empty? %><p class="catalog-unavailable">暂时没有可用安装包，请稍后再来。</p><% end %>
         </div>
         <div class="catalog-action">
           <div class="catalog-update"><span class="catalog-status-dot" aria-hidden="true"></span><%= updated_at ? "更新于 #{distribution_time(updated_at)}" : '暂无版本更新' %></div>
-          <%= link_to distribution_app_path(app), class: 'button catalog-download' do %><%= latest.empty? ? '查看应用' : '查看并下载' %><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg><% end %>
+          <%= link_to Distribution::AppDownloads.new(app).path, class: 'button catalog-download' do %><%= latest.empty? ? '查看应用' : '查看并下载' %><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg><% end %>
         </div>
-        <% if latest.any? %><div class="catalog-scan"><img src="<%= distribution_app_qrcode_path(app, size: 'large') %>" alt="<%= app.name %> 下载二维码" width="92" height="92" loading="lazy"><span>手机扫码下载</span></div><% end %>
+        <% if latest.any? %><div class="catalog-scan"><img src="<%= Distribution::AppDownloads.new(app).qrcode_path(size: 'large') %>" alt="<%= app.name %> 下载二维码" width="92" height="92" loading="lazy"><span>手机扫码下载</span></div><% end %>
       </article>
     <% end %>
   </div>

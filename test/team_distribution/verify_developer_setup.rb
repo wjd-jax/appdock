@@ -20,7 +20,8 @@ def check(label)
 end
 count = Release.count
 session = DeveloperSetupSession.new(Rails.application)
-session.host! 'apps.example.com:18443'
+acceptance_port = ENV.fetch('APPDOCK_ACCEPTANCE_HTTPS_PORT', '18443')
+session.host! "apps.example.com:#{acceptance_port}"
 session.https!
 session.get '/developers'
 check('anonymous setup page leads with AI handoff and interactive controls') { session.response.status == 200 && session.response.body.include?('交给 AI 完成接入') && session.response.body.include?('复制给 AI') && session.response.body.include?('setup-form') && !session.response.body.include?('开发者登录') }
@@ -38,7 +39,7 @@ check('manual CI generation has no branch dependency') { session.response.status
     check("#{platform}/#{trigger}: generation succeeds") { session.response.status == 200 }
     files = JSON.parse(session.response.body).fetch('files')
     cfg = JSON.parse(files.fetch('.team-distribution.json'))
-    check("#{platform}/#{trigger}: endpoint/channel and nonempty build configured") { !cfg.key?('channel_key') && cfg['endpoint'] == 'https://apps.example.com:18443' && cfg['build'].is_a?(Array) && cfg['build'].any? }
+    check("#{platform}/#{trigger}: endpoint/channel and nonempty build configured") { !cfg.key?('channel_key') && cfg['endpoint'] == "https://apps.example.com:#{acceptance_port}" && cfg['build'].is_a?(Array) && cfg['build'].any? }
     github = YAML.safe_load(files.fetch('.github/workflows/team-distribution.yml'))
     # Psych YAML 1.1 parses the unquoted GitHub key `on` as true.
     triggers = github['on'] || github[true]

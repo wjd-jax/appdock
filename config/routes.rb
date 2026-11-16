@@ -20,6 +20,7 @@ Rails.application.routes.draw do
   post '/notifications/test', to: 'distribution/notifications#test', as: :distribution_test_notification
   get '/developers', to: 'distribution/developers#index', as: :distribution_developer
   get '/workspace', to: 'distribution/workspace#index', as: :distribution_workspace
+  get '/workspace/apps/:id/packages/:platform/:bundle_id', to: 'distribution/apps#package', as: :distribution_manage_package, constraints: {bundle_id: /[^\/]+/}, format: false
   get '/workspace/apps/:id', to: 'distribution/apps#show', as: :distribution_manage_app
   patch '/workspace/apps/:id', to: 'distribution/apps#update'
   get '/upload', to: 'distribution/uploads#new', as: :distribution_new_upload
@@ -30,6 +31,8 @@ Rails.application.routes.draw do
   post '/workspace/environments/:id/share', to: 'distribution/versions#environment_share', as: :distribution_environment_share
   get '/workspace/operations', to: 'distribution/operations#index', as: :distribution_operations
   get '/a/:id/qrcode', to: 'distribution/app_downloads#qrcode', as: :distribution_app_qrcode
+  get '/a/:id/packages/:platform/:bundle_id/qrcode', to: 'distribution/app_downloads#package_qrcode', as: :distribution_package_qrcode, constraints: {bundle_id: /[^\/]+/}, format: false
+  get '/a/:id/packages/:platform/:bundle_id', to: 'distribution/app_downloads#package', as: :distribution_package, constraints: {bundle_id: /[^\/]+/}, format: false
   get '/a/:id', to: 'distribution/app_downloads#show', as: :distribution_app
   get '/d/:id/qrcode', to: 'distribution/public#qrcode', as: :distribution_environment_qrcode
   get '/d/:id', to: 'distribution/public#environment', as: :distribution_environment
@@ -292,6 +295,15 @@ Rails.application.routes.draw do
   ############################################
   # URL Friendly
   ############################################
+  product_alias = ->(request) { App.active.exists?(distribution_slug: request.path_parameters[:product_slug]) }
+  get '/:product_slug/:platform/:package_code/qrcode', to: 'distribution/app_downloads#package_alias_qrcode',
+      as: :distribution_package_alias_qrcode, constraints: {platform: /[a-z0-9]+/, package_code: /p[0-9]+/}, format: false
+  get '/:product_slug/:platform/:package_code', to: 'distribution/app_downloads#package_alias',
+      as: :distribution_package_alias, constraints: {platform: /[a-z0-9]+/, package_code: /p[0-9]+/}, format: false
+  get '/:product_slug/qrcode', to: 'distribution/app_downloads#product_alias_qrcode',
+      as: :distribution_product_alias_qrcode, constraints: product_alias, format: false
+  get '/:product_slug', to: 'distribution/app_downloads#product_alias',
+      as: :distribution_product_alias, constraints: product_alias, format: false
   scope path: ':channel', format: false, as: :friendly_channel do
     get '/overview', to: 'channels#show'
     get '', to: 'releases#index', as: 'releases'

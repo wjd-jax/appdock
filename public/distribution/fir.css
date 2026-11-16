@@ -46,3 +46,30 @@ body:has(.catalog-page)>.footer{border-color:#e5ebe8;color:#7d8d86;background:tr
 @media(max-width:700px){body:has(.catalog-page)>.shell{padding:32px 20px 40px}.catalog-app{grid-template-columns:minmax(0,1fr);padding:24px;column-gap:0}.catalog-scan{display:none}.catalog-page .catalog-heading{margin-bottom:22px}.catalog-page .catalog-heading h1{font-size:25px}.catalog-identity{gap:16px;margin-bottom:22px}.catalog-app-name h2{font-size:23px}.catalog-action{flex-direction:column;align-items:stretch;gap:16px;margin-top:22px}.catalog-page .catalog-download{width:100%;min-height:46px}.catalog-update{font-size:11px}.catalog-help{text-align:left;margin-top:22px}.catalog-versions{gap:10px}.catalog-platform{padding:13px 12px;grid-template-columns:minmax(0,1fr);gap:5px}.catalog-build,.catalog-size{font-size:11px}.catalog-platform strong{font-size:19px}.catalog-size{color:#96a299}.catalog-count{font-size:11px}body:has(.catalog-page)>.topbar{height:68px;padding-inline:20px}}
 @media(prefers-reduced-motion:no-preference){.catalog-download{transition:background-color .15s ease}}
 .catalog-versions:has(>.catalog-platform:only-child){grid-template-columns:minmax(0,1fr)}
+
+/* One product card contains distinct platform cards. */
+.fir-product-card{grid-column:span 2;min-width:0;min-height:400px;padding:30px 34px}
+.fir-product-head{display:flex;align-items:center;gap:20px;min-width:0}
+.fir-product-head>div{min-width:0}
+.fir-product-card .fir-product-head h2{margin:0 0 7px;color:#777}
+.fir-product-card .fir-summary{display:flex;flex-wrap:wrap;gap:2px 14px;align-items:center;font-size:12px}
+.fir-product-card .fir-summary a,.fir-product-card .fir-summary button{color:var(--brand);font-size:12px;padding:3px 0;line-height:1.5}
+.fir-platform-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:26px 0 24px}
+.fir-platform-group{display:grid;align-content:start;gap:12px;min-width:0}
+.fir-package{min-width:0;border:1px solid #e2e9e7;border-radius:10px;background:#fff;padding:20px;transition:border-color .15s ease}
+.fir-package:hover{border-color:#bfd8d2}
+.fir-package-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.fir-package-head h3{font-size:16px;font-weight:600;color:#566965;margin:0}
+.fir-package-head a{font-size:12px;color:#71827d}
+.fir-package-head a:hover{color:var(--brand)}
+.fir-package-id{font-size:12px;color:#56615e;line-height:1.6;overflow-wrap:anywhere;margin:0 0 10px}
+.fir-package-meta{font-size:12px;color:#697873;line-height:1.6;margin:5px 0}
+.fir-package-meta strong{font-weight:600;color:#3d514b}
+.fir-package-build{display:inline-block;margin-left:8px;padding:1px 6px;border-radius:3px;background:#f2f7f5;color:#627b72;font-size:11px}
+.fir-package-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:18px}
+.fir-package-actions .fir-package-preview{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:5px 13px;border-radius:4px;background:var(--brand);color:#fff;font-size:12px;line-height:1.5}
+.fir-package-actions .fir-package-preview:hover{background:var(--brand-hover);color:#fff}
+.fir-package-actions button{color:var(--brand);font-size:12px;padding:5px 0;line-height:1.5}
+@media(max-width:600px){.fir-product-card{grid-column:span 1;padding:24px}.fir-product-head{gap:15px}.fir-product-card .fir-product-head .app-icon img{width:68px;height:68px}.fir-platform-list{grid-template-columns:1fr;gap:12px;margin:22px 0}.fir-package{padding:18px}}
+
+.fir-package-head .environment-tag{font-size:10px;margin-left:8px}.fir-package-head{flex-wrap:wrap}

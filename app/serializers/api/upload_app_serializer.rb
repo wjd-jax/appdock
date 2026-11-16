@@ -5,7 +5,8 @@ class Api::UploadAppSerializer < ApplicationSerializer
   attributes :id, :version, :app_name, :bundle_id, :release_version, :build_version,
              :source, :branch, :git_commit, :ci_url, :size, :platform, :device_type,
              :icon_url, :release_url, :install_url, :qrcode_url, :changelog, :text_changelog,
-             :custom_fields, :created_at, :file_sha256, :distribution_status, :app_url, :environment_url
+             :custom_fields, :created_at, :file_sha256, :distribution_status, :business_environment, :app_url, :package_url,
+             :package_qrcode_url, :environment_url
 
   belongs_to :app
   belongs_to :scheme
@@ -13,6 +14,14 @@ class Api::UploadAppSerializer < ApplicationSerializer
 
   def app_url
     Distribution::AppDownloads.new(object.app).url
+  end
+
+  def package_url
+    Distribution::AppDownloads.new(object.app).package_url(object)
+  end
+
+  def package_qrcode_url
+    Distribution::AppDownloads.new(object.app).package_qrcode_url(object)
   end
 
   def environment_url

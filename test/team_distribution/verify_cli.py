@@ -2,17 +2,22 @@
 """Use only with the isolated verification URL/channel and a public test APK."""
 import argparse
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
+from urllib.parse import urlsplit
 
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--endpoint',required=True)
 p.add_argument('--channel-key',help='Legacy option, unused by automatic uploads')
 p.add_argument('--apk',required=True)
 a=p.parse_args()
-if not a.endpoint.endswith(':18443'): raise SystemExit('Refusing non-verification endpoint')
+url=urlsplit(a.endpoint)
+expected_port=int(os.environ.get('APPDOCK_ACCEPTANCE_HTTPS_PORT','18443'))
+if not (url.scheme=='https' and url.hostname=='apps.example.com' and url.port==expected_port and not url.path and not url.query and not url.fragment and not url.username and not url.password):
+    raise SystemExit('Refusing non-verification endpoint')
 cli=Path(__file__).resolve().parents[2]/'tools/team_release.py'
 apk=Path(a.apk).resolve()
 with tempfile.TemporaryDirectory(prefix='team-cli-check-') as tmp:

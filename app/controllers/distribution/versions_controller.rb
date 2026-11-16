@@ -15,7 +15,12 @@ module Distribution
           release.channel.update!(recommended_release: release)
         end
       end
-      redirect_to distribution_manage_app_path(release.app), notice: '版本信息已更新'
+      destination = if params[:return_to] == 'package'
+                      distribution_manage_package_path(release.app, release.platform, release.bundle_id)
+                    else
+                      distribution_manage_app_path(release.app)
+                    end
+      redirect_to destination, notice: '版本信息已更新'
     rescue ActiveRecord::RecordInvalid => e
       redirect_back fallback_location: distribution_workspace_path, alert: e.message
     end

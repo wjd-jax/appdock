@@ -23,7 +23,8 @@ AppDock 基于 [Zealot 6.2.2](https://github.com/tryzealot/zealot) 定制，为�
 | 场景 | 能力 |
 | --- | --- |
 | 上传安装包 | 拖拽上传 IPA / APK，解析包信息，显示进度；按 SHA-256 识别重复文件。首次上传可自动创建应用。 |
-| 分发测试版本 | 按平台与包标识归类，展示最新可用包及历史版本；提供固定应用下载页和二维码。 |
+| 分发测试版本 | 按产品汇总 iOS / Android 包，提供产品短链接、按平台与包标识的固定下载页及二维码；记录文件下载请求次数。 |
+| 区分业务环境 | 上传时选择测试或正式环境，默认测试环境；既有版本归为测试环境，下载及管理页可按环境筛选历史版本。 |
 | 接入开发流程 | 开发者页面提供 AI 接入指令、Python CLI，以及可选的 Fastlane 和 GitHub / GitLab CI 材料。 |
 | 团队通知 | 可配置 Lark / 飞书群机器人，在成功上传新版本后发送版本信息和下载链接。 |
 | iOS 设备收集 | 提供 UDID 收集入口，供签名和设备登记流程使用。 |
@@ -93,6 +94,8 @@ docker compose -f deploy/compose.yaml -f test/team_distribution/compose.acceptan
 bash test/team_distribution/run_acceptance.sh
 docker compose -f deploy/compose.yaml -f test/team_distribution/compose.acceptance.yaml down
 ```
+
+若默认验收端口被占用，可同时修改 `APPDOCK_HTTP_BIND`、`APPDOCK_HTTPS_BIND`，并设置 `APPDOCK_ACCEPTANCE_DOMAIN=apps.example.com:<HTTPS 端口>`；验收脚本会读取实际映射端口。
 
 验收脚本检查隔离配置、Rails 功能、上传与下载、权限边界、HTTPS 入口及 CLI。公开仓库曾在隔离环境完成完整镜像构建、空库首次启动及该套验收；真实签名 IPA 的设备安装、业务工程 CI 签名构建和外网 Tunnel 联通仍需在目标环境单独验证。
 

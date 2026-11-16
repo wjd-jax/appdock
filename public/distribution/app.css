@@ -4,3 +4,9 @@
 @media(max-width:600px){.topbar .nav-secondary{display:none}.topbar{gap:10px}.topbar nav{gap:12px}}
 
 .team-app-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.team-app-card{margin-bottom:0;min-width:0}.team-app-card h2{margin:0}.team-app-card .row>div{min-width:0}.team-app-card .app-icon img{width:56px;height:56px;border-radius:14px}.team-app-card .muted{font-size:12px}.team-platforms{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0}.team-app-grid+.upload-section{margin-top:28px}.upload-section>summary{font-size:17px}.upload-section>summary .badge{margin-left:10px}.team-app-card h2{overflow-wrap:anywhere}@media(max-width:700px){.team-app-grid{grid-template-columns:1fr}.team-app-card .row{gap:12px}.team-app-card .button{flex:1}}
+
+.environment-tag{display:inline-flex;align-items:center;max-width:100%;padding:2px 8px;border-radius:999px;background:#edf4f1;color:#376f60;font-size:11px;font-weight:600;line-height:1.5;white-space:nowrap}.environment-tag[data-business-environment="production"]{background:#eaf1fd;color:#315c9a}.environment-filter-label{display:flex;align-items:center;gap:9px;margin:0 0 16px;color:#687871;font-size:12px}.environment-filter-label select{width:auto;min-width:120px;margin:0;padding:5px 25px 5px 9px;border:1px solid #d4dfda;border-radius:4px;background:white;color:#415b50;font:inherit}.environment-filter-empty{padding:10px 0}[data-environment-item][hidden]{display:none!important}
+
+.environment-filter-form{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 16px}.environment-filter-form .environment-filter-label{margin:0}.environment-filter-form .text-button{font-size:12px;color:var(--brand)}
+
+@media(max-width:520px){.topbar nav a{white-space:nowrap}.topbar nav .badge[title]{display:none}}

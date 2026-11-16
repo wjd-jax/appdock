@@ -64,3 +64,47 @@
 .app-download .utility-links{display:flex;flex-wrap:wrap;gap:12px 22px;margin-top:16px}
 .app-download .utility-link{border:0;background:none;padding:0;color:#44695f;font-size:13px;font-weight:500;line-height:1.7;text-decoration:none;cursor:pointer}
 .app-download .utility-link:hover,.app-download .utility-link:focus-visible{color:#23867d;text-decoration:underline}
+
+/* Align the app identity and scannable QR on both app and package pages. */
+.app-download .download-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;max-width:700px;margin:0 auto;text-align:left}
+.app-download.package-download .download-hero{max-width:520px}
+.app-download .download-brand{display:flex;align-items:center;gap:16px;min-width:0}
+.app-download .download-brand .app-icon{flex:none}
+.app-download .download-brand .app-icon img{display:block;width:120px;height:120px;object-fit:cover;border-radius:24px;box-shadow:0 8px 18px #17263c14}
+.app-download .download-title{min-width:0}
+.app-download .download-title h1{margin:0 0 5px;color:#344844;font-size:30px;font-weight:600;line-height:1.25}
+.app-download .download-title p.muted{margin:0;color:#60736d;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.app-download .download-qr{flex:none;width:144px;text-align:center}
+.app-download .download-qr .qr{display:block;width:144px;height:144px;margin:0;padding:7px;border:1px solid #e1e7e6;border-radius:6px;background:#fff;mix-blend-mode:normal}
+.app-download .download-qr .qr-caption{display:block;margin-top:7px;color:#62756f;font-size:12px;line-height:1.5}
+.app-download .platform-list{margin-top:24px}
+.app-download.package-download .platform-list:has(>.platform-card:only-child){grid-template-columns:minmax(0,520px);margin-top:20px}
+.app-download.package-download .platform-card{padding:23px 24px;background:#fff}
+.app-download.package-download .platform-card .version-number{margin:16px 0 4px;font-size:30px;font-weight:600;color:#344844}
+.app-download.package-download .platform-card .version-number small{font-weight:400}
+.app-download.package-download .platform-card>p.muted{margin:0 0 18px}
+.app-download.package-download .platform-card .primary-install{min-height:50px;max-width:none;font-size:15px;font-weight:650}
+.app-download.package-download .latest-notes{margin-top:18px}
+.app-download.package-download .platform-card>.version-detail-link{margin-top:15px}
+.app-download.package-download .download-utilities{max-width:520px;margin-top:24px}
+@media(min-width:800px){
+  .app-download .download-center{max-width:760px;padding:26px 28px 22px;border:1px solid #dfe8e5;border-radius:12px;background:#fff}
+  .app-download.package-download .download-center{max-width:620px}
+  .app-download .download-hero,.app-download.package-download .download-hero{max-width:none;padding-bottom:20px;border-bottom:1px solid #e5ece9}
+  .app-download.package-download .platform-list:has(>.platform-card:only-child){grid-template-columns:1fr;max-width:none;margin-top:0}
+  .app-download.package-download .platform-card{padding:20px 0 0;border:0;background:transparent}
+  .app-download .download-utilities,.app-download.package-download .download-utilities{max-width:none;margin-top:20px}
+}
+@media(max-width:799px){
+  .app-download.package-download.download-scene{padding-top:28px}
+  .app-download .download-hero{display:block;max-width:420px;text-align:center}
+  .app-download .download-brand{flex-direction:column;gap:0}
+  .app-download .download-brand .app-icon img{width:88px;height:88px}
+  .app-download .download-title h1{margin:14px 0 4px;font-size:26px}
+  .app-download .download-qr{display:none}
+  .app-download.package-download .platform-list:has(>.platform-card:only-child){grid-template-columns:1fr;max-width:420px;margin-top:18px}
+  .app-download.package-download .platform-card{padding:21px}
+  .app-download.package-download .platform-card .version-number{font-size:28px}
+}
+
+.app-download .platform-card>.row{flex-wrap:wrap}.app-download .platform-card .environment-tag{margin-left:auto}.app-download .history-panel .environment-filter-label{margin:16px 0 12px}.app-download .history-panel .history-row .environment-tag{margin-right:4px}.download-center .eyebrow .environment-tag{vertical-align:middle}

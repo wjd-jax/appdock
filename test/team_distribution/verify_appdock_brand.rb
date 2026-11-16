@@ -20,7 +20,7 @@ class AppDockBrandSession < ActionDispatch::Integration::Session
   end
 end
 session = AppDockBrandSession.new(Rails.application)
-session.host! 'apps.example.com:18443'
+session.host! "apps.example.com:#{ENV.fetch('APPDOCK_ACCEPTANCE_HTTPS_PORT', '18443')}"
 session.https!
 %w[/workspace /upload /developers /udid /notifications /access].each do |path|
   session.get path

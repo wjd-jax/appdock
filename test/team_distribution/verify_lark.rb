@@ -43,7 +43,8 @@ Faraday.lark_response = Struct.new(:status,:body).new(200, '{"code":0}')
 check('actual release message'){service.deliver(release) && JSON.parse(Faraday.lark_request.body).dig('card','elements').first.dig('text','content').include?("版本：#{release.release_version}")}
 card = service.message_payload(release)[:card]
 buttons = card[:elements].find { |element| element[:tag] == 'action' }[:actions]
-check('download and exact release detail links') { buttons[0][:url] == Rails.application.routes.url_helpers.distribution_app_url(release.channel.app) && buttons[1][:url] == release.release_url }
+expected_package_path = "/#{release.app.distribution_slug}/#{release.platform.downcase}/p#{release.channel_id}"
+check('package and exact release detail links') { URI(buttons[0][:url]).path == expected_package_path && buttons[1][:url] == release.release_url }
 check('AppDock keyword and LAN requirement retained') { card.to_json.include?('AppDock') && card.to_json.include?('公司内网') }
 fixture = release.dup
 fixture.id = release.id

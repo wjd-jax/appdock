@@ -3,6 +3,12 @@
 class App < ApplicationRecord
   # default_scope { order(id: :asc) }
 
+  RESERVED_DISTRIBUTION_SLUGS = %w[
+    a access admin api apps archives assets backup catalog channels d dashboard
+    debug-files developers devices distribution download graphql health login
+    notifications p public releases schemes settings udid upload users workspace
+  ].freeze
+
   has_and_belongs_to_many :users
   has_many :collaborators, dependent: :destroy
   has_many :schemes, dependent: :destroy
@@ -21,6 +27,9 @@ class App < ApplicationRecord
   scope :active, -> { where(archived: false).or(where(archived: nil)) }
 
   validates :name, presence: true
+  validates :distribution_slug, presence: true, uniqueness: true, format: {with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/}
+
+  before_validation :assign_distribution_slug, on: :create
 
   after_destroy :delete_app_recently_releases_cache
 
@@ -119,6 +128,18 @@ class App < ApplicationRecord
   end
 
   private
+
+  def assign_distribution_slug
+    return if distribution_slug.present?
+
+    base = name.to_s.parameterize[0, 64].sub(/-+\z/, '')
+    base = 'app' if base.blank?
+    candidate = base
+    while RESERVED_DISTRIBUTION_SLUGS.include?(candidate) || App.exists?(distribution_slug: candidate) || Channel.where('lower(slug) = ?', candidate).exists?
+      candidate = "#{base}-#{SecureRandom.hex(3)}"
+    end
+    self.distribution_slug = candidate
+  end
 
   def recently_release_cache_key
     @recently_release_cache_key ||= "app_#{id}_recently_release"

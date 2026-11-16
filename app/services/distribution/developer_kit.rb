@@ -140,7 +140,7 @@ module Distribution
         `.team-distribution.json` 只需配置站点、构建命令和产物路径，上传后自动识别应用及平台。构建命令由开发者电脑/内网 Runner 执行，平台只生成配置，不在服务端运行命令。
 
         ## CLI
-        Python 3.8+，在业务工程根目录执行 `python3 tools/team_release.py release`。仅上传已有包用 `python3 tools/team_release.py upload <包路径>`。stdout 是真实 JSON 结果，构建日志在 stderr；成功含 release_url、qrcode_url、app_url、file_sha256、duplicate。上传完成后，应用页自动展示对应平台最新安装包。
+        Python 3.8+，在业务工程根目录执行 `python3 tools/team_release.py release`。仅上传已有包用 `python3 tools/team_release.py upload <包路径>`。stdout 是真实 JSON 结果，构建日志在 stderr；成功含 release_url、qrcode_url、package_url、package_qrcode_url、app_url、file_sha256、duplicate。同产品名汇总一个链接，各平台和包标识分别有固定链接。
 
         ## AI Skill
         接入包已含 `.agents/skills/team-distribution/`，保留其 SKILL.md、agents/openai.yaml 和 scripts/team_release.py。在支持项目 Skill 的 Codex 中重新打开工程/新建对话，然后调用 `$team-distribution 按项目配置构建并上传测试包`。其他 AI 工具按其 Skill 目录约定安装同一文件夹；不支持 Skill 时，将 AGENTS.distribution.md 的内容合并进已有项目规则。

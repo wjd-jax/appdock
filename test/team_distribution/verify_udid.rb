@@ -5,7 +5,7 @@ def check(label)
  puts "PASS #{label}"
 end
 s=ActionDispatch::Integration::Session.new(Rails.application)
-s.host!('apps.example.com:18443');s.https!
+s.host!("apps.example.com:#{ENV.fetch('APPDOCK_ACCEPTANCE_HTTPS_PORT', '18443')}");s.https!
 count=Device.count
 s.get('/udid');check('UDID page'){s.response.status==200 && s.response.body.include?('AppDock')}
 s.get('/udid/profile');check('profile MIME'){s.response.media_type=='application/x-apple-aspen-config'}
