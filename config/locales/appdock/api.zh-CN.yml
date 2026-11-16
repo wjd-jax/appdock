@@ -24,14 +24,14 @@ zh-CN:
         接口目前仅提供在用户密钥认证方式，参数是 `token`，请求接口时可在接口 query 或表单字段中传递此字段。
 
         ```
-        https://tryzealot.ews.im/api/users?token={token}
+        {host}/api/users?token={token}
         ```
 
         ### 用户密钥
 
-        用户密钥在[用户详情](https://zealot.ews.im/zh-Hans/docs/user-guide/user_settings)最底部找到。
+        用户密钥在当前 AppDock 的用户详情页获取。
     servers:
-      description: 演示服务器
+      description: 当前服务
     security:
       token:
         description: 用户密钥

@@ -27,14 +27,14 @@ en:
         Example:
 
         ```
-        https://tryzealot.ews.im/api/users?token={token}
+        {host}/api/users?token={token}
         ```
 
         ### Personal access tokens
 
-        Personal access tokens (PATs) can be found in from the [user settings](https://zealot.ews.im/docs/user-guide/user_settings).
+        Personal access tokens (PATs) can be found on this AppDock installation's user details page.
     servers:
-      description: Demo server
+      description: Current server
     security:
       token:
         description: User token

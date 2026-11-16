@@ -14,7 +14,7 @@ RSpec.configure do |config|
       },
       servers: [
         {
-          url: 'https://tryzealot.ews.im/api',
+          url: '/api',
           description: I18n.t('api.servers.description')
         }
       ],
@@ -103,7 +103,7 @@ RSpec.configure do |config|
               id: { type: :integer, format: :int32, example: 1 },
               app_name: { type: :string, example: 'First App' },
               bundle_id: { type: :string, example: '*' },
-              git_url: { type: :string, example: 'https://github.com/tryzealot/zealot' },
+              git_url: { type: :string, example: 'https://github.com/wjd-jax/appdock' },
               app: { '$ref': '#/components/schemas/App' },
               scheme: { '$ref': '#/components/schemas/Scheme' },
               releases: { type: :array, items: { '$ref': '#/components/schemas/Release' }}
@@ -149,7 +149,7 @@ RSpec.configure do |config|
               slug: { type: :string, example: 'Sk3y' },
               device_type: { type: :string, example: 'Android' },
               bundle_id: { type: :string, example: '*' },
-              git_url: { type: :string, example: 'https://github.com/tryzealot/zealot' },
+              git_url: { type: :string, example: 'https://github.com/wjd-jax/appdock' },
               has_password: { type: :boolean, example: false },
               download_filename_type: { type: :string, example: 'original' },
             }
@@ -164,12 +164,12 @@ RSpec.configure do |config|
               source: { type: :string, example: 'API' },
               branch: { type: :string, example: 'develop' },
               git_commit: { type: :string, example: 'bc58e308dd1caf2226a402291839afbbdabcabf0' },
-              ci_url: { type: :string, example: 'https://github.com/tryzealot/zealot/actions/runs/9211335126' },
+              ci_url: { type: :string, example: 'https://github.com/wjd-jax/appdock/actions' },
               size: { type: :integer, example: 392173 },
               platform: { type: :string, example: 'iOS' },
               device_type: { type: :string, example: 'iPhone' },
-              icon_url: { type: :string, example: 'https://tryzealot.ews.im/assets/zealot-icon-123e8c86.png' },
-              install_url: { type: :string, example: 'https://tryzealot.ews.im/M9DJa/681/download' },
+              icon_url: { type: :string, example: 'https://apps.example.com/assets/app-icon.png' },
+              install_url: { type: :string, example: 'https://apps.example.com/download/releases/1/app.apk' },
               changelog: { type: :array, items: { '$ref': '#/components/schemas/ReleaseChangelog' }},
               text_changelog: { type: :string, example: '- bump 1.1\n-n fixes bugs' },
               custom_fields: { type: :array, items: { '$ref': '#/components/schemas/ReleaseCustomField' }},
