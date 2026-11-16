@@ -38,11 +38,11 @@
   const dialog=form.querySelector('#upload-dialog'), close=form.querySelector('#upload-close');
   close.addEventListener('click',()=>dialog.close());
   dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault();});
-  let inspected=false, inspecting=null, busy=false, metadata=null;
+  let inspected=false, inspecting=null, busy=false, metadata=null, checkingDuplicate=false;
   const status=(text,error=false)=>{message.textContent=text;message.classList.toggle('upload-error',error);};
   const submitLabel=()=>{submit.textContent=metadata?.duplicate&&!duplicateCheck.checked?'使用已有安装包 ↗':'开始上传 ↑';};
   const inspect=async()=>{
-    inspecting?.abort();inspected=false;metadata=null;preview.replaceChildren();preview.setAttribute('aria-busy','true');result.hidden=true;duplicateOptions.hidden=true;duplicateCheck.checked=false;retry.hidden=true;progress.hidden=true;progress.value=0;submit.disabled=true;submitLabel();
+    inspecting?.abort();inspected=false;checkingDuplicate=false;metadata=null;preview.replaceChildren();preview.setAttribute('aria-busy','true');result.hidden=true;duplicateOptions.hidden=true;duplicateCheck.checked=false;retry.hidden=true;progress.hidden=true;progress.value=0;submit.disabled=true;submitLabel();
     const file=fileInput.files[0];
     if(!file){status('选择文件后，将自动检查包信息。');return;}
     if(!dialog.open)dialog.showModal();
@@ -62,11 +62,29 @@
       preview.append(title,document.createElement('br'),document.createTextNode(`${body.bundle_id||''} · ${(body.size/1024/1024).toFixed(2)} MB`));
       if(body.duplicate){const warning=document.createElement('p');warning.textContent='已有相同安装包，可直接使用原版本链接。';preview.append(warning);duplicateOptions.hidden=false;}
       status(body.duplicate?'已找到相同安装包，可直接生成已有版本的下载链接。':'包信息已就绪，可直接上传或补充更新说明。');submitLabel();
+      if(body.business_environment!==form.querySelector('[name="business_environment"]:checked').value)checkDuplicate();
     }catch(error){if(error.name!=='AbortError'&&inspecting===controller){preview.setAttribute('aria-busy','false');preview.textContent='包信息暂未识别';status(error instanceof TypeError?'识别连接失败，请检查网络后重新识别。':error.message,true);retry.textContent='重新识别';retry.hidden=false;}}
     finally{if(inspecting===controller){inspecting=null;submit.disabled=!inspected;}}
   };
+  const checkDuplicate=async()=>{
+    if(!metadata || busy)return;
+    inspecting?.abort();inspected=false;checkingDuplicate=true;submit.disabled=true;retry.hidden=true;duplicateOptions.hidden=true;duplicateCheck.checked=false;preview.querySelector('p')?.remove();submit.textContent='开始上传 ↑';
+    const environment=form.querySelector('[name="business_environment"]:checked').value;
+    status('正在检查所选环境是否已有相同安装包…');
+    const controller=new AbortController();inspecting=controller;
+    try{
+      const response=await fetch(form.dataset.duplicateUrl,{method:'POST',headers:{'X-CSRF-Token':csrf(),'Accept':'application/json','Content-Type':'application/json'},body:JSON.stringify({sha256:metadata.sha256,bundle_id:metadata.bundle_id,platform:metadata.platform,business_environment:environment}),signal:controller.signal});
+      if(!response.headers.get('Content-Type')?.includes('application/json'))throw new Error('服务暂时不可用，请点击重新检查重试。');
+      const body=await response.json();if(!response.ok)throw new Error(body.error||'无法检查重复文件');
+      if(inspecting!==controller)return;
+      metadata.duplicate=body.duplicate;metadata.business_environment=environment;inspected=true;checkingDuplicate=false;
+      if(body.duplicate){const warning=document.createElement('p');warning.textContent='已有相同安装包，可直接使用原版本链接。';preview.append(warning);duplicateOptions.hidden=false;}
+      status(body.duplicate?'此环境已有相同安装包，可直接生成已有版本的下载链接。':'包信息已就绪，可直接上传或补充更新说明。');submitLabel();
+    }catch(error){if(error.name!=='AbortError'&&inspecting===controller){status(error instanceof TypeError?'检查连接失败，请检查网络后重试。':error.message,true);retry.textContent='重新检查';retry.hidden=false;}}
+    finally{if(inspecting===controller){inspecting=null;submit.disabled=!inspected;}}
+  };
   document.querySelector('[data-select-package]')?.addEventListener('click',event=>{event.preventDefault();fileInput.click();});
-  fileInput.addEventListener('change',inspect);duplicateCheck.addEventListener('change',submitLabel);environmentInputs.forEach(input=>input.addEventListener('change',inspect));
+  fileInput.addEventListener('change',inspect);duplicateCheck.addEventListener('change',submitLabel);environmentInputs.forEach(input=>input.addEventListener('change',checkDuplicate));
   ['dragenter','dragover'].forEach(name=>drop.addEventListener(name,event=>{event.preventDefault();if(!busy)drop.classList.add('dragging');}));
   ['dragleave','drop'].forEach(name=>drop.addEventListener(name,()=>drop.classList.remove('dragging')));
   drop.addEventListener('drop',event=>{event.preventDefault();if(busy)return;const file=event.dataTransfer.files[0];if(file){const transfer=new DataTransfer();transfer.items.add(file);fileInput.files=transfer.files;inspect();}});
@@ -97,5 +115,5 @@
     };
     xhr.onerror=()=>failure('网络连接失败，文件仍保留，可直接重试。');xhr.ontimeout=()=>failure('上传超时，请检查网络后重试。');status('准备上传…');xhr.send(data);
   };
-  form.addEventListener('submit',upload);retry.addEventListener('click',event=>inspected?upload(event):inspect());
+  form.addEventListener('submit',upload);retry.addEventListener('click',event=>inspected?upload(event):checkingDuplicate?checkDuplicate():inspect());
 })();

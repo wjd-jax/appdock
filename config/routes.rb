@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   patch '/workspace/apps/:id', to: 'distribution/apps#update'
   get '/upload', to: 'distribution/uploads#new', as: :distribution_new_upload
   post '/workspace/inspect', to: 'distribution/uploads#inspect_package', as: :distribution_inspect
+  post '/workspace/duplicate', to: 'distribution/uploads#check_duplicate', as: :distribution_duplicate
   post '/workspace/uploads', to: 'distribution/uploads#create', as: :distribution_upload
   patch '/workspace/versions/:id', to: 'distribution/versions#update', as: :distribution_version
   post '/workspace/versions/:id/share', to: 'distribution/versions#share', as: :distribution_version_share

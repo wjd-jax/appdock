@@ -34,6 +34,30 @@ module Distribution
       parser&.clear! if parser&.respond_to?(:clear!)
     end
 
+    def check_duplicate
+      business_environment = params[:business_environment]
+      sha = params[:sha256].to_s
+      bundle_id = params[:bundle_id].to_s
+      platform = params[:platform].to_s
+      unless TeamRelease::BUSINESS_ENVIRONMENTS.key?(business_environment) &&
+             sha.match?(/\A[0-9a-f]{64}\z/) && bundle_id.present? && bundle_id.bytesize <= 255 &&
+             %w[iOS Android].include?(platform)
+        return render json: {error: '包信息或包环境无效，请重新选择安装包'}, status: :unprocessable_entity
+      end
+
+      package = Struct.new(:bundle_id, :platform).new(bundle_id, platform)
+      channel = UploadPackage.automatic_channel(package)
+      if channel
+        authorize channel, :update?
+      else
+        authorize App.new, :create?
+      end
+      duplicates = channel ? channel.releases.where.not(distribution_status: 'retired')
+                                    .where(file_sha256: sha, business_environment: business_environment)
+                                    .order(id: :desc).select(&:file?) : []
+      render json: {business_environment: business_environment, duplicate: duplicates.present?}
+    end
+
     def create
       result = UploadPackage.new(params, current_user, source: 'web').call
       downloads = AppDownloads.new(result.release.app)

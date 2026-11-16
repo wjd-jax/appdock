@@ -54,6 +54,13 @@ check('app identity and default testing environment') { r.bundle_id=='com.piko.l
 s.get '/catalog'
 check('catalog renders package links for an existing app') { s.response.status==200 && s.response.body.include?(app.name) && s.response.body.include?("/#{app.distribution_slug}/#{r.platform.downcase}/p#{r.channel_id}") }
 count = Release.count
+duplicate_params = {sha256: r.file_sha256, bundle_id: r.bundle_id, platform: r.platform}
+s.post '/workspace/duplicate', params: duplicate_params.merge(business_environment: 'testing'), headers: {'X-CSRF-Token'=>csrf, 'ACCEPT'=>'application/json'}
+check('environment switch checks duplicates without uploading again') { s.response.status==200 && JSON.parse(s.response.body)['duplicate'] && Release.count==count }
+s.post '/workspace/duplicate', params: duplicate_params.merge(business_environment: 'production'), headers: {'X-CSRF-Token'=>csrf, 'ACCEPT'=>'application/json'}
+check('another environment has no duplicate') { s.response.status==200 && !JSON.parse(s.response.body)['duplicate'] && Release.count==count }
+s.post '/workspace/duplicate', params: duplicate_params.merge(sha256: 'invalid', business_environment: 'testing'), headers: {'X-CSRF-Token'=>csrf, 'ACCEPT'=>'application/json'}
+check('invalid fingerprint rejected') { s.response.status==422 && Release.count==count }
 post_package s, '/api/apps/upload', {name: 'Display name changed'}
 check('same package is deduplicated into same app even if display name changes') { s.response.status==200 && JSON.parse(s.response.body)['id']==r.id && Release.count==count && App.active.count==1 }
 post_package s, '/workspace/inspect', {business_environment: 'production'}, {'X-CSRF-Token'=>csrf}
