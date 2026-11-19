@@ -1,14 +1,22 @@
 require 'action_dispatch/testing/integration'
 raise 'Isolation required' unless ActiveRecord::Base.connection_db_config.database == 'appdock_verify'
+class InternalDistributionSession < ActionDispatch::Integration::Session
+  def process(*args, **kwargs)
+    super
+  ensure
+    Rails.application.executor.run!(reset: true)
+  end
+end
 def check(label)
   raise label unless yield
   puts "PASS #{label}"
 end
+public_host = ENV.fetch('APPDOCK_PUBLIC_HOST', 'download.example.com')
 service=Distribution::NetworkAccess
 service::ROOT.mkpath
 service.request!(false)
 File.write(service::ROOT.join('status.json'), {state:'disabled',heartbeat:Time.now.to_f}.to_json)
-s=ActionDispatch::Integration::Session.new(Rails.application);s.host!('download.17love.life');s.https!
+s=InternalDistributionSession.new(Rails.application);s.host!(public_host);s.https!
 s.get('/')
 check('disabled rejects public catalog'){s.response.status==503}
 s.get('/distribution/app.css')
@@ -17,14 +25,19 @@ service.request!(true)
 File.write(service::ROOT.join('status.json'), {state:'enabled',heartbeat:Time.now.to_f}.to_json)
 app=App.active.first; release=Distribution::AppDownloads.new(app).available.find(&:android?)
 raise 'Android fixture required' unless release
-['/',"/a/#{app.id}","/a/#{app.id}/qrcode",'/distribution/app.css'].each do |path|
+downloads=Distribution::AppDownloads.new(app)
+['/', downloads.path, downloads.qrcode_path, downloads.package_path(release), downloads.package_qrcode_path(release),
+ "/a/#{app.id}","/a/#{app.id}/qrcode", "/a/#{app.id}/packages/#{release.platform}/#{release.bundle_id}",
+ "/a/#{app.id}/packages/#{release.platform}/#{release.bundle_id}/qrcode", '/distribution/app.css',
+ '/distribution/platform-apple.svg', '/distribution/platform-android.svg',
+ '/distribution/appdock-octopus-20261117.svg', '/distribution/appdock-octopus-touch-20261117.png', '/favicon.ico'].each do |path|
   s.get(path)
   check("public read #{path}"){s.response.status==200 && s.response.headers['Cache-Control'].include?('no-store')}
 end
 s.get("/public/icons/#{release.id}")
 check('icon endpoint validates file existence'){s.response.status == (release.icon&.file&.exists? ? 200 : 404)}
 s.get("/a/#{app.id}")
-check('all absolute URLs use public hostname'){!s.response.body.include?('apps.17love.life') && s.response.body.include?('https://download.17love.life')}
+check('all absolute URLs use public hostname'){!s.response.body.include?('apps.example.com') && s.response.body.include?("https://#{public_host}")}
 check('no management navigation on public pages'){!s.response.body.include?('上传通知') && !s.response.body.include?('开发接入')}
 url=Distribution::PublicContext.set(external:true){release.release_url}
 s.get(URI(url).request_uri)
@@ -32,10 +45,10 @@ check('version details reachable'){s.response.status==200}
 s.get(URI(Distribution::PublicContext.set(external:true){release.qrcode_url}).request_uri)
 check('version QR reachable'){s.response.status==200}
 s.get("/channels/#{release.channel.slug}/releases/#{release.id}/install")
-check('manifest uses public binary host'){s.response.status==200 && s.response.body.include?('https://download.17love.life/download/releases/') && !s.response.body.include?('apps.17love.life')}
+check('manifest uses public binary host'){s.response.status==200 && s.response.body.include?("https://#{public_host}/download/releases/") && !s.response.body.include?('apps.example.com')}
 
 s.get(URI(Distribution::PublicContext.set(external:true){release.download_url}).request_uri)
-check('binary redirect stays public'){s.response.status==302 && s.response.location.start_with?('https://download.17love.life/')}
+check('binary redirect stays public'){s.response.status==302 && s.response.location.start_with?("https://#{public_host}/")}
 s.follow_redirect!
 check('APK bytes downloadable'){s.response.status==200 && s.response.body.bytesize==release.file.size}
 check('APK bytes match fixture'){Digest::SHA256.hexdigest(s.response.body)==Digest::SHA256.file(release.file.path).hexdigest}
@@ -65,7 +78,7 @@ service.request!(false)
 s.get("/a/#{app.id}")
 check('disable denies immediately despite enabled status'){s.response.status==503}
 check('public context cleared'){!Distribution::PublicContext.external}
-lan=ActionDispatch::Integration::Session.new(Rails.application);lan.host!('apps.17love.life');lan.https!
+lan=InternalDistributionSession.new(Rails.application);lan.host!("apps.example.com:#{ENV.fetch('APPDOCK_ACCEPTANCE_HTTPS_PORT', '18443')}" );lan.https!
 lan.get('/access');check('LAN settings reachable'){lan.response.status==200}
 lan.patch('/access',params:{enabled:'1'});check('CSRF enforced'){lan.response.status==422 && !service.requested?}
 lan.get('/access');token=Nokogiri::HTML(lan.response.body).at_css('meta[name="csrf-token"]')['content']

@@ -14,6 +14,7 @@ services:
     image: appdock:acceptance-20261116
     environment:
       RAILS_SERVE_STATIC_FILES: "true"
+      APPDOCK_PUBLIC_HOST: download.example.com
       APPDOCK_POSTGRES_DB_NAME: appdock_verify
       APPDOCK_DOMAIN: ${APPDOCK_ACCEPTANCE_DOMAIN:-apps.example.com:18443}
     volumes:

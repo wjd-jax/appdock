@@ -21,7 +21,7 @@ COPY db/ /app/db/
 COPY docker/rootfs/ /
 COPY --from=assets /app/app/assets/builds/ /app/app/assets/builds/
 COPY public/distribution/ /app/public/distribution/
-COPY public/loading.html /app/public/loading.html
+COPY public/loading.html public/favicon.ico /app/public/
 COPY swagger/ /app/swagger/
 COPY tools/team_release.py /app/public/distribution/team-release.py
 COPY examples/team-distribution/ /app/public/distribution/examples/

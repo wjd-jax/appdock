@@ -174,3 +174,17 @@
 /* Bring the version number closer to the package identifier on product summary cards. */
 .app-download:not(.package-download) .platform-card>.row + p.muted{margin-bottom:8px}
 .app-download:not(.package-download) .platform-card .version-number{margin-top:8px}
+
+/* Keep platform tabs and the environment selector in one history toolbar. */
+.app-download .history-filters{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #dce6e1;margin:12px 0 16px}
+.app-download .history-filters .environment-tabs{margin:0;border:0;min-width:0}
+.app-download .history-environment{margin:0 0 0 auto;flex:none}
+.app-download .history-environment select{width:auto;min-height:36px;margin:0;padding:6px 28px 6px 10px;border:1px solid #dce6e1;border-radius:6px;background-color:#fff;color:#52665f;font:inherit;font-size:13px;cursor:pointer}
+.app-download .history-environment select:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+@media(max-width:479px){.app-download .history-filters{gap:8px}.app-download .history-filters .environment-tabs a{padding:8px 7px}.app-download .history-environment select{padding-left:8px;padding-right:22px;font-size:12px}}
+
+/* Product summary: fill the available width for one platform or a device-filtered view. */
+.app-download:not(.package-download) .platform-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));max-width:none}
+.app-download:not(.package-download) .platform-list:has(>.platform-card:only-child),.app-download:not(.package-download).platform-filtered .platform-list{grid-template-columns:minmax(0,1fr)}
+.app-download:not(.package-download) .platform-card>p.muted,.app-download:not(.package-download) .download-title h1{overflow-wrap:anywhere}
+@media(max-width:799px){.app-download:not(.package-download) .download-center{max-width:420px}.app-download:not(.package-download) .platform-list{grid-template-columns:minmax(0,1fr)}}

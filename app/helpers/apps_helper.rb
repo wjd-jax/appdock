@@ -19,11 +19,11 @@ module AppsHelper
 
   def app_icon(release, options = {})
     if Distribution::PublicContext.external
-      src = release&.icon&.file&.exists? ? distribution_public_icon_path(release) : '/distribution/appdock-logo.svg'
+      src = release&.icon&.file&.exists? ? distribution_public_icon_path(release) : '/distribution/appdock-octopus-20261117.svg'
       return image_tag(src, **options)
     end
     unless release&.icon && release.icon.file && release.icon.file.exists?
-      return image_tag('/distribution/appdock-logo.svg', **options)
+      return image_tag('/distribution/appdock-octopus-20261117.svg', **options)
     end
 
     options[:data] ||= {}

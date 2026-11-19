@@ -52,9 +52,9 @@ r = Release.find(first['id'])
 app = r.app
 check('app identity and default testing environment') { r.bundle_id=='com.piko.launcher' && App.active.count==1 && URI(first['app_url']).host=='apps.example.com' && URI(first['app_url']).port==acceptance_port.to_i && URI(first['app_url']).path=="/#{app.distribution_slug}" && r.file? && r.business_environment=='testing' && first['business_environment']=='testing' }
 s.get '/catalog'
-check('catalog renders package links for an existing app') { s.response.status==200 && s.response.body.include?(app.name) && s.response.body.include?("/#{app.distribution_slug}/#{r.platform.downcase}/p#{r.channel_id}") }
+check('catalog renders package links for an existing app') { s.response.status==200 && s.response.body.include?(app.name) && s.response.body.include?("/#{app.distribution_slug}/#{r.platform.downcase}/p#{r.channel_id}/testing") }
 count = Release.count
-duplicate_params = {sha256: r.file_sha256, bundle_id: r.bundle_id, platform: r.platform}
+duplicate_params = {sha256: r.file_sha256, bundle_id: r.bundle_id, platform: r.platform, version: r.release_version, build: r.build_version}
 s.post '/workspace/duplicate', params: duplicate_params.merge(business_environment: 'testing'), headers: {'X-CSRF-Token'=>csrf, 'ACCEPT'=>'application/json'}
 check('environment switch checks duplicates without uploading again') { s.response.status==200 && JSON.parse(s.response.body)['duplicate'] && Release.count==count }
 s.post '/workspace/duplicate', params: duplicate_params.merge(business_environment: 'production'), headers: {'X-CSRF-Token'=>csrf, 'ACCEPT'=>'application/json'}
@@ -62,14 +62,14 @@ check('another environment has no duplicate') { s.response.status==200 && !JSON.
 s.post '/workspace/duplicate', params: duplicate_params.merge(sha256: 'invalid', business_environment: 'testing'), headers: {'X-CSRF-Token'=>csrf, 'ACCEPT'=>'application/json'}
 check('invalid fingerprint rejected') { s.response.status==422 && Release.count==count }
 post_package s, '/api/apps/upload', {name: 'Display name changed'}
-check('same package is deduplicated into same app even if display name changes') { s.response.status==200 && JSON.parse(s.response.body)['id']==r.id && Release.count==count && App.active.count==1 }
+check('same package returns a conflict in the same app even if display name changes') { s.response.status==409 && JSON.parse(s.response.body)['existing_id']==r.id && Release.count==count && App.active.count==1 }
 post_package s, '/workspace/inspect', {business_environment: 'production'}, {'X-CSRF-Token'=>csrf}
 check('production preview does not reuse testing file') { s.response.status==200 && !JSON.parse(s.response.body)['duplicate'] }
 post_package s, '/api/apps/upload', {business_environment: 'production'}
 production = Release.find(JSON.parse(s.response.body)['id'])
 check('same file in production creates a separate version') { s.response.status==201 && production.id!=r.id && production.business_environment=='production' && Release.count==count+1 }
 post_package s, '/api/apps/upload', {business_environment: 'production'}
-check('same production file deduplicates within its environment') { s.response.status==200 && JSON.parse(s.response.body)['id']==production.id && Release.count==count+1 }
+check('same production version requires explicit overwrite confirmation') { s.response.status==409 && JSON.parse(s.response.body)['existing_id']==production.id && Release.count==count+1 }
 post_package s, '/api/apps/upload', {business_environment: 'invalid'}
 check('invalid environment is rejected') { s.response.status==422 && Release.count==count+1 }
 post_package s, '/api/apps/upload', {}, {'Origin'=>'https://untrusted.example'}
@@ -80,7 +80,21 @@ post_package s, '/workspace/inspect', {}, {'X-CSRF-Token'=>csrf}
 check('package preview finds duplicates automatically') { s.response.status==200 && JSON.parse(s.response.body)['duplicate'] }
 post_package s, '/workspace/inspect', {business_environment: 'production'}, {'X-CSRF-Token'=>csrf}
 check('production preview finds production duplicate') { s.response.status==200 && JSON.parse(s.response.body)['duplicate'] && JSON.parse(s.response.body)['business_environment']=='production' }
-post_package s, '/workspace/uploads', {allow_duplicate: 'true', changelog: '<script>alert(1)</script> new version'}, {'X-CSRF-Token'=>csrf}
+# Keep the original parser and file handling while simulating another build of this APK.
+def with_build(build)
+  original_parse = AppInfo.method(:parse)
+  AppInfo.define_singleton_method(:parse) do |path|
+    parsed = original_parse.call(path)
+    parsed.define_singleton_method(:build_version) { build }
+    parsed
+  end
+  yield
+ensure
+  AppInfo.define_singleton_method(:parse, original_parse)
+end
+with_build((r.build_version.to_i + 1).to_s) do
+  post_package s, '/workspace/uploads', {changelog: '<script>alert(1)</script> new version'}, {'X-CSRF-Token'=>csrf}
+end
 check('web upload without target saves an explicit testing version') { s.response.status==201 && Release.count==count+2 && JSON.parse(s.response.body)['business_environment']=='testing' }
 newest = Release.find(JSON.parse(s.response.body)['id'])
 check('new release starts with zero downloads') { newest.download_count == 0 }
@@ -123,7 +137,7 @@ check('retired version skipped by latest app view') { s.response.status==200 && 
 app.update!(archived: true)
 s.get first['app_url']
 check('archived app download unavailable') { s.response.status==404 }
-post_package s, '/api/apps/upload'
+with_build((r.build_version.to_i + 2).to_s) { post_package s, '/api/apps/upload' }
 check('reupload after archival creates a fresh visible app without restoring fixtures') { s.response.status==201 && App.active.count==1 }
 active_release = Release.find(JSON.parse(s.response.body)['id'])
 check('archive retained and automatic detection stable') { active_release.app.id!=app.id && app.reload.archived? && App.active.first.id==active_release.app.id }

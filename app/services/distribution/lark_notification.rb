@@ -75,7 +75,7 @@ module Distribution
       if release
         platform = {'ios' => 'iOS', 'android' => 'Android', 'macos' => 'macOS'}
           .fetch(release.channel.device_type.to_s.downcase, release.channel.device_type.to_s.presence || '未知平台')
-        title = "#{release.app_name.to_s.truncate(60)} · #{platform} 新测试版"
+        title = "#{release.app_name.to_s.truncate(60)} · #{platform} #{release.business_environment_key == 'production' ? '新正式版' : '新测试版'}"
         version = release.release_version.to_s.presence || '未填写'
         build = release.build_version.to_s.presence || '未填写'
         summary, shortened = changelog_preview(release)
@@ -87,10 +87,11 @@ module Distribution
         if shortened
           elements << {tag: 'note', elements: [{tag: 'plain_text', content: '以上为更新摘要，完整记录请查看版本详情。'}]}
         end
-        package_url = Distribution::AppDownloads.new(release.app).package_url(release)
+        package_url = release.release_url
         elements << {tag: 'action', actions: [
           {tag: 'button', text: {tag: 'plain_text', content: '下载并安装'}, type: 'primary', url: package_url},
-          {tag: 'button', text: {tag: 'plain_text', content: '完整更新记录'}, type: 'default', url: release.release_url}
+          {tag: 'button', text: {tag: 'plain_text', content: '完整更新记录'}, type: 'default', url: release.release_url},
+          {tag: 'button', text: {tag: 'plain_text', content: release.business_environment_key == 'production' ? '最新正式版' : '最新测试版'}, type: 'default', url: Distribution::AppDownloads.new(release.app).package_url(release)}
         ]}
       else
         title = 'AppDock · 上传通知测试'

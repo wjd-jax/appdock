@@ -1,20 +1,20 @@
 module Distribution
   class AppsController < BaseController
-    before_action :verify_authenticity_token, only: :update
+    before_action :verify_authenticity_token, only: %i[update destroy destroy_package]
     before_action :load_app
 
     def show
       @environment_filter = history_environment_filter
       releases = Release.where(channel_id: @app.channel_ids)
-      @header_releases = releases.order(id: :desc).limit(50)
-      @releases = filter_history(releases).order(id: :desc).limit(50)
+      @header_releases = releases.recently_uploaded.limit(50)
+      @releases = filter_history(releases).recently_uploaded.limit(50)
     end
 
     def package
       @package_platform = params[:platform]
       @package_bundle_id = params[:bundle_id]
       releases = Release.where(channel_id: @app.channel_ids, bundle_id: @package_bundle_id)
-                        .order(id: :desc).select { |release| release.platform == @package_platform }
+                        .recently_uploaded.select { |release| release.platform == @package_platform }
       raise ActiveRecord::RecordNotFound if releases.empty?
 
       @package_view = true
@@ -29,6 +29,32 @@ module Distribution
       redirect_to distribution_manage_app_path(@app), notice: '应用信息已保存'
     rescue ActiveRecord::RecordInvalid => e
       redirect_to distribution_manage_app_path(@app), alert: e.message
+    end
+
+    def destroy
+      authorize @app, :destroy?
+      @app.destroy!
+      redirect_to distribution_workspace_path, notice: '产品及其全部安装包、历史版本已删除', status: :see_other
+    rescue ActiveRecord::RecordNotDestroyed => e
+      redirect_to distribution_manage_app_path(@app), alert: e.message, status: :see_other
+    end
+
+    def destroy_package
+      authorize @app, :destroy?
+      Release.transaction do
+        @app.lock!
+        releases = Release.where(channel_id: @app.channel_ids, bundle_id: params[:bundle_id])
+                          .select { |release| release.platform == params[:platform] }
+        raise ActiveRecord::RecordNotFound if releases.empty?
+
+        releases.each do |release|
+          authorize release, :destroy?
+          release.destroy!
+        end
+      end
+      redirect_to distribution_manage_app_path(@app), notice: '安装包及其全部历史版本已删除', status: :see_other
+    rescue ActiveRecord::RecordNotDestroyed => e
+      redirect_to distribution_manage_app_path(@app), alert: e.message, status: :see_other
     end
 
     private

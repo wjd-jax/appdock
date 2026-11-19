@@ -2,6 +2,6 @@
 = turbo_frame_tag 'site_title' do
   = link_to root_path, class: 'navbar-brand', data: { turbo: false } do
     = picture_tag do
-      = tag(:source, srcset: image_path('/distribution/appdock-logo.svg'), media: '(prefers-color-scheme: dark)', class: 'dark-brand-image brand-image')
-      = image_tag '/distribution/appdock-logo.svg', class: 'brand-image'
+      = tag(:source, srcset: image_path('/distribution/appdock-octopus-20261117.svg'), media: '(prefers-color-scheme: dark)', class: 'dark-brand-image brand-image')
+      = image_tag '/distribution/appdock-octopus-20261117.svg', class: 'brand-image'
     span.brand-text.fw-light = site_title

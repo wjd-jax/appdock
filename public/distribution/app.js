@@ -1,12 +1,70 @@
 (() => {
   const csrf = () => document.querySelector('meta[name="csrf-token"]')?.content || '';
   const toast = (message) => { const el=document.querySelector('#toast'); el.textContent=message; el.style.display='block'; clearTimeout(el.timer); el.timer=setTimeout(()=>el.style.display='none',2800); };
+  const initialToast = document.querySelector('#toast');
+  if (initialToast?.dataset.message) {
+    toast(initialToast.dataset.message);
+    delete initialToast.dataset.message;
+  }
   document.addEventListener('click', async event => {
     const copy=event.target.closest('[data-copy],[data-copy-target]');
     if(copy){event.preventDefault();const value=copy.dataset.copy || document.getElementById(copy.dataset.copyTarget)?.value;try{await navigator.clipboard.writeText(value);toast(copy.dataset.copySuccess||'链接已复制');if(copy.dataset.copyFeedback){if(!copy.dataset.originalText)copy.dataset.originalText=copy.textContent;copy.textContent=copy.dataset.copyFeedback;clearTimeout(copy.copyFeedbackTimer);copy.copyFeedbackTimer=setTimeout(()=>{copy.textContent=copy.dataset.originalText;delete copy.dataset.originalText;},2200);}}catch{toast('复制失败，请选中链接手动复制');}}
     const confirmed=event.target.closest('[data-confirm]');
     if(confirmed && !window.confirm(confirmed.dataset.confirm))event.preventDefault();
   });
+  const notesDialog = document.querySelector('#notes-dialog');
+  const notesForm = notesDialog?.querySelector('#notes-edit-form');
+  document.addEventListener('click', event => {
+    const button = event.target.closest('[data-edit-notes]');
+    if (!button || !notesDialog) return;
+    notesForm.action = button.dataset.updateUrl;
+    notesForm.querySelector('[name="return_to"]').value = button.dataset.returnTo;
+    notesForm.querySelector('[name="changelog"]').value = button.dataset.notes;
+    notesDialog.querySelector('[data-notes-version]').textContent = button.dataset.versionLabel;
+    notesDialog.showModal();
+    notesForm.querySelector('textarea').focus();
+  });
+  notesDialog?.querySelectorAll('[data-notes-cancel]').forEach(button => button.addEventListener('click', () => notesDialog.close()));
+  notesDialog?.addEventListener('click', event => { if (event.target === notesDialog) notesDialog.close(); });
+  notesForm?.addEventListener('submit', event => {
+    if (notesForm.dataset.saving === 'true') { event.preventDefault(); return; }
+    notesForm.dataset.saving = 'true';
+    const button = notesForm.querySelector('[type="submit"]'); button.disabled = true; button.textContent = '正在保存…';
+  });
+  const deleteDialog = document.querySelector('#delete-dialog');
+  let pendingDeletion = null;
+  document.addEventListener('submit', event => {
+    const form = event.target.closest('form[data-delete-confirm]');
+    if (!form) return;
+    if (form.dataset.deleting === 'true') { event.preventDefault(); return; }
+    if (form.dataset.deletionConfirmed !== 'true') {
+      event.preventDefault();
+      if (!deleteDialog) { toast('确认窗口暂不可用，请刷新后重试'); return; }
+      pendingDeletion = {form, submitter: event.submitter};
+      const title = event.submitter?.textContent.trim() || '删除';
+      const [subject, ...impact] = form.dataset.deleteConfirm.split('？');
+      deleteDialog.querySelector('#delete-dialog-title').textContent = title + '？';
+      deleteDialog.querySelector('[data-delete-subject]').textContent = subject.replace(/^确定删除/, '');
+      deleteDialog.querySelector('[data-delete-impact]').textContent = impact.join('？');
+      deleteDialog.showModal();
+      return;
+    }
+    delete form.dataset.deletionConfirmed;
+    form.dataset.deleting = 'true';
+    form.querySelectorAll('button[type="submit"]').forEach(button => { button.disabled = true; button.textContent = '正在删除…'; });
+  });
+  deleteDialog?.querySelectorAll('[data-delete-cancel]').forEach(button => button.addEventListener('click', () => deleteDialog.close()));
+  deleteDialog?.addEventListener('click', event => { if (event.target === deleteDialog) deleteDialog.close(); });
+  deleteDialog?.addEventListener('close', () => { pendingDeletion = null; });
+  deleteDialog?.querySelector('[data-delete-proceed]').addEventListener('click', () => {
+    if (!pendingDeletion) return;
+    const {form, submitter} = pendingDeletion;
+    pendingDeletion = null;
+    deleteDialog.close();
+    form.dataset.deletionConfirmed = 'true';
+    form.requestSubmit(submitter || undefined);
+  });
+  window.addEventListener('pageshow', event => { if (event.persisted) window.location.reload(); });
   const ua=navigator.userAgent; const platform=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1)?'iOS':/Android/.test(ua)?'Android':null;
   document.querySelectorAll('.udid-page').forEach(el=>el.dataset.device=platform==='iOS'?'ios':'other');
   document.querySelectorAll('[data-platform-card]').forEach(card=>card.classList.toggle('preferred',card.dataset.platformCard===platform));
@@ -16,7 +74,8 @@
     cards.forEach(card=>card.hidden=card.dataset.platformCard!==platform);
     appDownload.classList.add('platform-filtered');
     const history=[...appDownload.querySelectorAll('[data-history-platform]')];
-    history.forEach(row=>row.hidden=row.dataset.historyPlatform!==platform);
+    const explicitHistory=appDownload.querySelector('[data-history-platform-explicit="true"]');
+    if(!explicitHistory)history.forEach(row=>row.hidden=row.dataset.historyPlatform!==platform);
     const historySection=appDownload.querySelector('[data-platform-history]');
     if(historySection){
       historySection.hidden=false;
@@ -34,15 +93,17 @@
   document.querySelector('#app-search')?.addEventListener('input',event=>{const query=event.target.value.toLowerCase().trim();document.querySelectorAll('[data-app-name]').forEach(card=>card.hidden=!card.dataset.appName.includes(query));});
   document.querySelectorAll('[data-environment-filter]').forEach(filter=>filter.addEventListener('change',()=>filter.form.requestSubmit?filter.form.requestSubmit():filter.form.submit()));
   const form=document.querySelector('#upload-form'); if(!form)return;
-  const fileInput=form.querySelector('#package-file'), preview=form.querySelector('#package-preview'), message=form.querySelector('#upload-message'), submit=form.querySelector('#upload-submit'), retry=form.querySelector('#upload-retry'), progress=form.querySelector('#upload-progress'), result=form.querySelector('#upload-result'), drop=form.querySelector('#dropzone'), duplicateOptions=form.querySelector('#duplicate-options'), duplicateCheck=form.querySelector('[name="allow_duplicate"]'), environmentInputs=[...form.querySelectorAll('[name="business_environment"]')];
-  const dialog=form.querySelector('#upload-dialog'), close=form.querySelector('#upload-close');
+  const fileInput=form.querySelector('#package-file'), preview=form.querySelector('#package-preview'), message=form.querySelector('#upload-message'), submit=form.querySelector('#upload-submit'), retry=form.querySelector('#upload-retry'), progress=form.querySelector('#upload-progress'), result=form.querySelector('#upload-result'), drop=form.querySelector('#dropzone'), duplicateOptions=form.querySelector('#duplicate-options'), environmentInputs=[...form.querySelectorAll('[name="business_environment"]')];
+  const dialog=form.querySelector('#upload-dialog'), close=form.querySelector('#upload-close'), successDialog=form.querySelector('#upload-success-dialog');
+  form.querySelector('#upload-success-close').addEventListener('click',()=>successDialog.close());
   close.addEventListener('click',()=>dialog.close());
   dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault();});
   let inspected=false, inspecting=null, busy=false, metadata=null, checkingDuplicate=false;
   const status=(text,error=false)=>{message.textContent=text;message.classList.toggle('upload-error',error);};
-  const submitLabel=()=>{submit.textContent=metadata?.duplicate&&!duplicateCheck.checked?'使用已有安装包 ↗':'开始上传 ↑';};
+  const submitLabel=()=>{submit.textContent=metadata?.duplicate?'覆盖旧安装包 ↑':'开始上传 ↑';};
   const inspect=async()=>{
-    inspecting?.abort();inspected=false;checkingDuplicate=false;metadata=null;preview.replaceChildren();preview.setAttribute('aria-busy','true');result.hidden=true;duplicateOptions.hidden=true;duplicateCheck.checked=false;retry.hidden=true;progress.hidden=true;progress.value=0;submit.disabled=true;submitLabel();
+    if(successDialog.open)successDialog.close();
+    inspecting?.abort();inspected=false;checkingDuplicate=false;metadata=null;preview.replaceChildren();preview.setAttribute('aria-busy','true');result.hidden=true;duplicateOptions.hidden=true;retry.hidden=true;progress.hidden=true;progress.value=0;submit.disabled=true;submitLabel();
     const file=fileInput.files[0];
     if(!file){status('选择文件后，将自动检查包信息。');return;}
     if(!dialog.open)dialog.showModal();
@@ -58,33 +119,33 @@
       const body=await response.json();if(!response.ok)throw new Error(body.error||'无法识别安装包');
       if(inspecting!==controller)return;
       metadata=body;inspected=true;preview.setAttribute('aria-busy','false');preview.replaceChildren();
-      const title=document.createElement('strong');title.textContent=`${body.name||'应用'} · ${String(body.platform).toLowerCase()==='ios'?'iOS':'Android'} · ${body.version||'版本待识别'}`;
+      const title=document.createElement('strong');title.textContent=`${body.name||'应用'} · ${String(body.platform).toLowerCase()==='ios'?'iOS':'Android'} · ${body.version||'版本待识别'} (build ${body.build||'待识别'})`;
       preview.append(title,document.createElement('br'),document.createTextNode(`${body.bundle_id||''} · ${(body.size/1024/1024).toFixed(2)} MB`));
-      if(body.duplicate){const warning=document.createElement('p');warning.textContent='已有相同安装包，可直接使用原版本链接。';preview.append(warning);duplicateOptions.hidden=false;}
-      status(body.duplicate?'已找到相同安装包，可直接生成已有版本的下载链接。':'包信息已就绪，可直接上传或补充更新说明。');submitLabel();
+      if(body.duplicate){const warning=document.createElement('p');warning.textContent='版本号和 build 号均已存在，发布时将提示是否覆盖。';preview.append(warning);duplicateOptions.hidden=false;}
+      status(body.duplicate?'已找到相同版本和 build，点击发布后确认是否覆盖旧包。':'包信息已就绪，可直接上传或补充更新说明。');submitLabel();
       if(body.business_environment!==form.querySelector('[name="business_environment"]:checked').value)checkDuplicate();
     }catch(error){if(error.name!=='AbortError'&&inspecting===controller){preview.setAttribute('aria-busy','false');preview.textContent='包信息暂未识别';status(error instanceof TypeError?'识别连接失败，请检查网络后重新识别。':error.message,true);retry.textContent='重新识别';retry.hidden=false;}}
     finally{if(inspecting===controller){inspecting=null;submit.disabled=!inspected;}}
   };
   const checkDuplicate=async()=>{
     if(!metadata || busy)return;
-    inspecting?.abort();inspected=false;checkingDuplicate=true;submit.disabled=true;retry.hidden=true;duplicateOptions.hidden=true;duplicateCheck.checked=false;preview.querySelector('p')?.remove();submit.textContent='开始上传 ↑';
+    inspecting?.abort();inspected=false;checkingDuplicate=true;submit.disabled=true;retry.hidden=true;duplicateOptions.hidden=true;preview.querySelector('p')?.remove();submit.textContent='开始上传 ↑';
     const environment=form.querySelector('[name="business_environment"]:checked').value;
     status('正在检查所选环境是否已有相同安装包…');
     const controller=new AbortController();inspecting=controller;
     try{
-      const response=await fetch(form.dataset.duplicateUrl,{method:'POST',headers:{'X-CSRF-Token':csrf(),'Accept':'application/json','Content-Type':'application/json'},body:JSON.stringify({sha256:metadata.sha256,bundle_id:metadata.bundle_id,platform:metadata.platform,business_environment:environment}),signal:controller.signal});
+      const response=await fetch(form.dataset.duplicateUrl,{method:'POST',headers:{'X-CSRF-Token':csrf(),'Accept':'application/json','Content-Type':'application/json'},body:JSON.stringify({version:metadata.version,build:metadata.build,sha256:metadata.sha256,bundle_id:metadata.bundle_id,platform:metadata.platform,business_environment:environment}),signal:controller.signal});
       if(!response.headers.get('Content-Type')?.includes('application/json'))throw new Error('服务暂时不可用，请点击重新检查重试。');
       const body=await response.json();if(!response.ok)throw new Error(body.error||'无法检查重复文件');
       if(inspecting!==controller)return;
-      metadata.duplicate=body.duplicate;metadata.business_environment=environment;inspected=true;checkingDuplicate=false;
-      if(body.duplicate){const warning=document.createElement('p');warning.textContent='已有相同安装包，可直接使用原版本链接。';preview.append(warning);duplicateOptions.hidden=false;}
-      status(body.duplicate?'此环境已有相同安装包，可直接生成已有版本的下载链接。':'包信息已就绪，可直接上传或补充更新说明。');submitLabel();
+      metadata.duplicate=body.duplicate;metadata.existing_id=body.existing_id;metadata.business_environment=environment;inspected=true;checkingDuplicate=false;
+      if(body.duplicate){const warning=document.createElement('p');warning.textContent='版本号和 build 号均已存在，发布时将提示是否覆盖。';preview.append(warning);duplicateOptions.hidden=false;}
+      status(body.duplicate?'此环境已有相同版本和 build，点击发布后确认是否覆盖旧包。':'包信息已就绪，可直接上传或补充更新说明。');submitLabel();
     }catch(error){if(error.name!=='AbortError'&&inspecting===controller){status(error instanceof TypeError?'检查连接失败，请检查网络后重试。':error.message,true);retry.textContent='重新检查';retry.hidden=false;}}
     finally{if(inspecting===controller){inspecting=null;submit.disabled=!inspected;}}
   };
   document.querySelector('[data-select-package]')?.addEventListener('click',event=>{event.preventDefault();fileInput.click();});
-  fileInput.addEventListener('change',inspect);duplicateCheck.addEventListener('change',submitLabel);environmentInputs.forEach(input=>input.addEventListener('change',checkDuplicate));
+  fileInput.addEventListener('change',inspect);environmentInputs.forEach(input=>input.addEventListener('change',checkDuplicate));
   ['dragenter','dragover'].forEach(name=>drop.addEventListener(name,event=>{event.preventDefault();if(!busy)drop.classList.add('dragging');}));
   ['dragleave','drop'].forEach(name=>drop.addEventListener(name,()=>drop.classList.remove('dragging')));
   drop.addEventListener('drop',event=>{event.preventDefault();if(busy)return;const file=event.dataTransfer.files[0];if(file){const transfer=new DataTransfer();transfer.items.add(file);fileInput.files=transfer.files;inspect();}});
@@ -93,25 +154,44 @@
     const url=safeURL(body.package_url||body.release_url),appURL=safeURL(body.app_url||body.workspace_url),qr=safeURL(body.package_qrcode_url||body.qrcode_url);
     result.replaceChildren();result.className='upload-success-grid';
     const content=document.createElement('div'),badge=document.createElement('span'),title=document.createElement('h2'),description=document.createElement('p'),actions=document.createElement('div'),link=document.createElement('a'),copy=document.createElement('button'),appLink=document.createElement('a'),qrImage=document.createElement('img');
-    badge.className='badge green';badge.textContent=body.duplicate?'已有版本已就绪':'上传成功';title.textContent=metadata?.name?`${metadata.name} 已可下载安装`:'安装包已可下载安装';description.textContent=`${body.business_environment==='production'?'正式环境':'测试环境'} · 把下载链接或二维码分享给团队即可。`;
+    badge.className='badge green';badge.textContent=body.overwritten?'覆盖成功':'上传成功';title.textContent=metadata?.name?`${metadata.name} 已可下载安装`:'安装包已可下载安装';description.textContent=`${body.business_environment==='production'?'正式环境':'测试环境'} · 把下载链接或二维码分享给团队即可。`;
     actions.className='row';link.className='button';link.href=url;link.target='_blank';link.rel='noopener';link.textContent='打开安装包固定页 ↗';
     copy.type='button';copy.className='button secondary';copy.dataset.copy=url;copy.textContent='复制安装包链接';actions.append(link,copy);
     appLink.className='text-link';appLink.href=appURL;appLink.textContent='查看产品汇总页 →';
     const qrURL=new URL(qr);qrURL.searchParams.set('size','large');qrImage.className='result-qr';qrImage.src=qrURL.href;qrImage.alt='安装包固定链接二维码';content.append(badge,title,description,actions,appLink);result.append(content,qrImage);result.hidden=false;
   };
-  const upload=event=>{
-    event?.preventDefault();if(busy)return;
+  const overwriteDialog=form.querySelector('#overwrite-dialog');
+  let confirming=false;
+  const askOverwrite=()=>new Promise(resolve=>{
+    overwriteDialog.querySelector('#overwrite-package').textContent=`版本 ${metadata.version} · build ${metadata.build} · ${metadata.business_environment==='production'?'正式环境':'测试环境'}`;
+    overwriteDialog.returnValue='';
+    overwriteDialog.addEventListener('close',()=>resolve(overwriteDialog.returnValue==='confirm'),{once:true});
+    overwriteDialog.showModal();
+  });
+  overwriteDialog.querySelectorAll('[data-overwrite-cancel]').forEach(button=>button.addEventListener('click',()=>overwriteDialog.close('cancel')));
+  overwriteDialog.querySelector('#overwrite-confirm').addEventListener('click',()=>overwriteDialog.close('confirm'));
+  const upload=async event=>{
+    event?.preventDefault();if(busy||confirming)return;
     if(!inspected){status('请先选择并完成安装包识别。',true);return;}
-    const data=new FormData(form);busy=true;close.disabled=true;fileInput.disabled=true;duplicateCheck.disabled=true;environmentInputs.forEach(input=>input.disabled=true);form.querySelector('#upload-changelog').disabled=true;submit.disabled=true;submit.textContent='正在上传…';retry.hidden=true;progress.hidden=false;progress.value=0;result.hidden=true;
+    if(metadata?.duplicate){
+      confirming=true;
+      let accepted;
+      try{accepted=await askOverwrite();}finally{confirming=false;}
+      if(!accepted){status('已取消覆盖，旧安装包保持不变。');return;}
+    }
+    const data=new FormData(form);if(metadata?.duplicate){data.set('overwrite','true');data.set('overwrite_release_id',metadata.existing_id);}busy=true;close.disabled=true;fileInput.disabled=true;environmentInputs.forEach(input=>input.disabled=true);form.querySelector('#upload-changelog').disabled=true;submit.disabled=true;submit.textContent='正在上传…';retry.hidden=true;progress.hidden=false;progress.value=0;result.hidden=true;
     const xhr=new XMLHttpRequest();xhr.open('POST',form.dataset.uploadUrl);xhr.setRequestHeader('X-CSRF-Token',csrf());xhr.setRequestHeader('Accept','application/json');xhr.timeout=30*60*1000;
-    const finish=()=>{busy=false;close.disabled=false;fileInput.disabled=false;duplicateCheck.disabled=false;environmentInputs.forEach(input=>input.disabled=false);form.querySelector('#upload-changelog').disabled=false;submit.disabled=false;submitLabel();};
+    const finish=()=>{busy=false;close.disabled=false;fileInput.disabled=false;environmentInputs.forEach(input=>input.disabled=false);form.querySelector('#upload-changelog').disabled=false;submit.disabled=false;submitLabel();};
     const failure=text=>{finish();status(text,true);retry.textContent='重试上传';retry.hidden=false;};
     xhr.upload.onprogress=event=>{if(event.lengthComputable){progress.value=event.loaded/event.total*100;status(event.loaded===event.total?'文件上传完成，正在保存…':`上传中 ${Math.round(progress.value)}%`);}};
     xhr.onload=()=>{
       let body;try{body=JSON.parse(xhr.responseText);}catch{return failure('服务暂时未返回结果，请稍后重试。');}
+      if(xhr.status===409&&body.duplicate){metadata.duplicate=true;metadata.existing_id=body.existing_id;duplicateOptions.hidden=false;return failure('该版本和 build 已存在，请重新点击发布并确认是否覆盖。');}
       if(xhr.status<200||xhr.status>=300)return failure(body.error||'上传失败，请重试。');
       try{renderResult(body);}catch(error){return failure(error.message);}
-      finish();progress.value=100;status(body.duplicate?'已使用已有版本，没有重复保存文件。':'上传完成，团队现在可以下载安装。');result.scrollIntoView({behavior:'smooth',block:'nearest'});
+      finish();progress.value=100;status(body.overwritten?'旧版本安装包已覆盖，原下载链接可继续使用。':'上传完成，团队现在可以下载安装。');dialog.close();successDialog.showModal();
+      inspected=false;metadata=null;submit.disabled=true;fileInput.value='';form.querySelector('#upload-changelog').value='';
+      form.querySelector('#file-label').textContent='拖拽到这里上传';form.querySelector('#file-hint').textContent='或点击选择 IPA / APK 文件';
     };
     xhr.onerror=()=>failure('网络连接失败，文件仍保留，可直接重试。');xhr.ontimeout=()=>failure('上传超时，请检查网络后重试。');status('准备上传…');xhr.send(data);
   };

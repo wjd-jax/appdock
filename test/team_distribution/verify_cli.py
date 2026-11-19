@@ -29,8 +29,11 @@ with tempfile.TemporaryDirectory(prefix='team-cli-check-') as tmp:
         assert (r.returncode==0)==success,(r.returncode,r.stderr)
         return json.loads(r.stdout if success else r.stderr.strip().splitlines()[-1])
     result=run(['release'],True)
-    assert result['file_sha256'] and result['duplicate'] is True and 'share=' not in result['release_url']
-    print('PASS: configured fixture build + token-free API upload + structured links + dedupe')
+    assert result['file_sha256'] and result['duplicate'] is False and 'share=' not in result['release_url']
+    assert urlsplit(result['package_url']).path.endswith('/testing')
+    print('PASS: configured fixture build + token-free API upload + structured links')
+    assert 'HTTP 409' in run(['upload'], False)['error']
+    print('PASS: duplicate upload requires explicit overwrite confirmation')
     cfg['build']=[sys.executable,'-c','raise SystemExit(7)'];(root/'.team-distribution.json').write_text(json.dumps(cfg))
     assert '构建失败' in run(['release'],False)['error']
     print('PASS: failed build never uploads')

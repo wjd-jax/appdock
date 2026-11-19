@@ -43,8 +43,11 @@ Faraday.lark_response = Struct.new(:status,:body).new(200, '{"code":0}')
 check('actual release message'){service.deliver(release) && JSON.parse(Faraday.lark_request.body).dig('card','elements').first.dig('text','content').include?("版本：#{release.release_version}")}
 card = service.message_payload(release)[:card]
 buttons = card[:elements].find { |element| element[:tag] == 'action' }[:actions]
-expected_package_path = "/#{release.app.distribution_slug}/#{release.platform.downcase}/p#{release.channel_id}"
-check('package and exact release detail links') { URI(buttons[0][:url]).path == expected_package_path && buttons[1][:url] == release.release_url }
+expected_package_path = "/#{release.app.distribution_slug}/#{release.platform.downcase}/p#{release.channel_id}/#{release.business_environment_key}"
+check('notification downloads the exact version and exposes its environment link') do
+  buttons[0][:url] == release.release_url && buttons[1][:url] == release.release_url &&
+    URI(buttons.fetch(2)[:url]).path == expected_package_path
+end
 check('AppDock keyword and LAN requirement retained') { card.to_json.include?('AppDock') && card.to_json.include?('公司内网') }
 fixture = release.dup
 fixture.id = release.id
@@ -79,7 +82,7 @@ check('disabled does not enqueue'){LarkUploadNotificationJob.queue_adapter.enque
 LarkUploadNotificationJob.queue_adapter = original_adapter
 service.save!({enabled:'0',clear_secret:'1'})
 check('secret removal'){service.credentials['secret'].blank?}
-s=ActionDispatch::Integration::Session.new(Rails.application);s.host!('apps.17love.life');s.https!
+s=ActionDispatch::Integration::Session.new(Rails.application);s.host!("apps.example.com:#{ENV.fetch('APPDOCK_ACCEPTANCE_HTTPS_PORT', '18443')}");s.https!
 s.get('/notifications')
 check('configuration page rendered and private'){s.response.status==200 && s.response.headers['Cache-Control'].include?('no-store')}
 check('credentials absent from html'){!s.response.body.include?(url) && !s.response.body.include?('isolated-secret')}

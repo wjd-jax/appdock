@@ -25,7 +25,8 @@ class Api::Apps::UploadController < Api::BaseController
   def create
     result = Distribution::UploadPackage.new(params, current_user, source: params[:source].presence || 'api').call
     body = ActiveModelSerializers::SerializableResource.new(result.release, serializer: Api::UploadAppSerializer).as_json
-    render json: body.merge(duplicate: result.duplicate), status: result.duplicate ? :ok : :created
+    render json: body.merge(duplicate: result.duplicate, overwritten: result.overwritten, existing_id: result.release.id,
+                            error: (result.duplicate ? '版本号和 build 号已存在；确认覆盖需传 overwrite=true 和 overwrite_release_id=existing_id' : nil)), status: result.duplicate ? :conflict : :created
   rescue Distribution::UploadPackage::InvalidPackage => e
     render json: {error: e.message}, status: :unprocessable_entity
   end

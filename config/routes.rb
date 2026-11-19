@@ -23,17 +23,20 @@ Rails.application.routes.draw do
   get '/workspace/apps/:id/packages/:platform/:bundle_id', to: 'distribution/apps#package', as: :distribution_manage_package, constraints: {bundle_id: /[^\/]+/}, format: false
   get '/workspace/apps/:id', to: 'distribution/apps#show', as: :distribution_manage_app
   patch '/workspace/apps/:id', to: 'distribution/apps#update'
+  delete '/workspace/apps/:id', to: 'distribution/apps#destroy'
+  delete '/workspace/apps/:id/packages/:platform/:bundle_id', to: 'distribution/apps#destroy_package', constraints: {bundle_id: /[^\/]+/}, format: false
   get '/upload', to: 'distribution/uploads#new', as: :distribution_new_upload
   post '/workspace/inspect', to: 'distribution/uploads#inspect_package', as: :distribution_inspect
   post '/workspace/duplicate', to: 'distribution/uploads#check_duplicate', as: :distribution_duplicate
   post '/workspace/uploads', to: 'distribution/uploads#create', as: :distribution_upload
   patch '/workspace/versions/:id', to: 'distribution/versions#update', as: :distribution_version
+  delete '/workspace/versions/:id', to: 'distribution/versions#destroy'
   post '/workspace/versions/:id/share', to: 'distribution/versions#share', as: :distribution_version_share
   post '/workspace/environments/:id/share', to: 'distribution/versions#environment_share', as: :distribution_environment_share
   get '/workspace/operations', to: 'distribution/operations#index', as: :distribution_operations
   get '/a/:id/qrcode', to: 'distribution/app_downloads#qrcode', as: :distribution_app_qrcode
-  get '/a/:id/packages/:platform/:bundle_id/qrcode', to: 'distribution/app_downloads#package_qrcode', as: :distribution_package_qrcode, constraints: {bundle_id: /[^\/]+/}, format: false
-  get '/a/:id/packages/:platform/:bundle_id', to: 'distribution/app_downloads#package', as: :distribution_package, constraints: {bundle_id: /[^\/]+/}, format: false
+  get '/a/:id/packages/:platform/:bundle_id(/:package_environment)/qrcode', to: 'distribution/app_downloads#package_qrcode', as: :distribution_package_qrcode, constraints: {bundle_id: /[^\/]+/, package_environment: /testing|production/}, format: false
+  get '/a/:id/packages/:platform/:bundle_id(/:package_environment)', to: 'distribution/app_downloads#package', as: :distribution_package, constraints: {bundle_id: /[^\/]+/, package_environment: /testing|production/}, format: false
   get '/a/:id', to: 'distribution/app_downloads#show', as: :distribution_app
   get '/d/:id/qrcode', to: 'distribution/public#qrcode', as: :distribution_environment_qrcode
   get '/d/:id', to: 'distribution/public#environment', as: :distribution_environment
@@ -297,10 +300,10 @@ Rails.application.routes.draw do
   # URL Friendly
   ############################################
   product_alias = ->(request) { App.active.exists?(distribution_slug: request.path_parameters[:product_slug]) }
-  get '/:product_slug/:platform/:package_code/qrcode', to: 'distribution/app_downloads#package_alias_qrcode',
-      as: :distribution_package_alias_qrcode, constraints: {platform: /[a-z0-9]+/, package_code: /p[0-9]+/}, format: false
-  get '/:product_slug/:platform/:package_code', to: 'distribution/app_downloads#package_alias',
-      as: :distribution_package_alias, constraints: {platform: /[a-z0-9]+/, package_code: /p[0-9]+/}, format: false
+  get '/:product_slug/:platform/:package_code(/:package_environment)/qrcode', to: 'distribution/app_downloads#package_alias_qrcode',
+      as: :distribution_package_alias_qrcode, constraints: {platform: /[a-z0-9]+/, package_code: /p[0-9]+/, package_environment: /testing|production/}, format: false
+  get '/:product_slug/:platform/:package_code(/:package_environment)', to: 'distribution/app_downloads#package_alias',
+      as: :distribution_package_alias, constraints: {platform: /[a-z0-9]+/, package_code: /p[0-9]+/, package_environment: /testing|production/}, format: false
   get '/:product_slug/qrcode', to: 'distribution/app_downloads#product_alias_qrcode',
       as: :distribution_product_alias_qrcode, constraints: product_alias, format: false
   get '/:product_slug', to: 'distribution/app_downloads#product_alias',

@@ -24,7 +24,7 @@ export APPDOCK_ACCEPTANCE_HTTPS_PORT="$acceptance_https_port"
 printf 'PASS: isolated database and loopback HTTPS port %s\n' "$acceptance_https_port"
 
 "${compose[@]}" exec -T appdock bin/rails zeitwerk:check
-for script in verify.rb verify_package_links.rb verify_download_counts.rb verify_developer_setup.rb verify_udid.rb verify_lark.rb verify_network_access.rb verify_appdock_brand.rb; do
+for script in verify.rb verify_package_links.rb verify_download_counts.rb verify_developer_setup.rb verify_udid.rb verify_lark.rb verify_network_access.rb verify_appdock_brand.rb verify_release_link_time.rb verify_environment_links.rb verify_deletion.rb; do
   printf 'Running %s\n' "$script"
   "${compose[@]}" exec -T -e APPDOCK_ACCEPTANCE_HTTPS_PORT="$acceptance_https_port" appdock bin/rails runner --skip-executor "/checks/$script"
 done

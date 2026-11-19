@@ -2,13 +2,13 @@
 class AppDockPublicGateway
   ALLOWED = {
     'distribution/catalog' => %w[index icon],
-    'distribution/app_downloads' => %w[show qrcode],
+    'distribution/app_downloads' => %w[show qrcode package package_qrcode product_alias product_alias_qrcode package_alias package_alias_qrcode],
     'releases' => %w[index show auth],
     'releases/install' => %w[show],
     'releases/qrcode' => %w[show],
     'download/releases' => %w[show download]
   }.freeze
-  STATIC = %w[/distribution/app.css /distribution/app.js /distribution/fir.css /distribution/download.css /distribution/appdock-logo.svg /distribution/ribbons-left.svg].freeze
+  STATIC = %w[/distribution/app.css /distribution/app.js /distribution/fir.css /distribution/download.css /distribution/appdock-logo.svg /distribution/appdock-touch-icon.png /distribution/appdock-octopus-20261117.svg /distribution/appdock-octopus-touch-20261117.png /favicon.ico /distribution/ribbons-left.svg /distribution/platform-apple.svg /distribution/platform-android.svg].freeze
   def initialize(app)
     @app = app
   end

@@ -1,7 +1,7 @@
 module Distribution
   class UploadPackage
     class InvalidPackage < StandardError; end
-    Result = Struct.new(:release, :duplicate, keyword_init: true)
+    Result = Struct.new(:release, :duplicate, :overwritten, keyword_init: true)
 
     def initialize(params, user, source: 'api')
       @params, @user, @source = params, user, source
@@ -17,6 +17,14 @@ module Distribution
       Channel.joins(:releases, scheme: :app).merge(App.active)
              .where(device_type: device_for(parser), releases: {bundle_id: parser.bundle_id})
              .distinct.order(:id).first
+    end
+
+    # Match the parsed package identity, never client-supplied version overrides.
+    def self.existing_release(channel, bundle_id:, version:, build:, environment:)
+      return unless channel && version.present? && build.present?
+      channel.releases.where(bundle_id: bundle_id, release_version: version.to_s,
+                             build_version: build.to_s, business_environment: environment)
+             .order(id: :desc).detect(&:file?)
     end
 
     def call
@@ -40,19 +48,32 @@ module Distribution
           Pundit.authorize(@user, channel, :update?)
         end
         channel.lock!
-        existing = channel.releases.where.not(distribution_status: 'retired')
-                          .where(file_sha256: sha, business_environment: business_environment)
-                          .order(id: :desc).detect(&:file?)
-        if existing && @params[:allow_duplicate].to_s != 'true'
+        existing = self.class.existing_release(channel, bundle_id: parser.bundle_id,
+                    version: parser.release_version, build: parser.build_version, environment: business_environment)
+        confirmed = @params[:overwrite].to_s == 'true' && @params[:overwrite_release_id].to_s == existing&.id.to_s
+        if existing && !confirmed
           result = Result.new(release: existing, duplicate: true)
         else
-          permitted = @params.permit(:file, :changelog, :release_type, :branch, :git_commit, :ci_url, :custom_fields, :release_version, :build_version)
-          release = channel.releases.upload_file(permitted, parser: parser, source: @source)
+          permitted = @params.permit(:file, :changelog, :release_type, :branch, :git_commit, :ci_url, :custom_fields)
+          if existing
+            Pundit.authorize(@user, existing, :update?)
+            release = existing
+            release.assign_attributes({changelog: nil, release_type: nil, branch: nil, git_commit: nil, ci_url: nil, custom_fields: nil}.merge(permitted.to_h))
+            release.metadata&.destroy!
+            release.metadata = nil
+            release.devices.clear
+            release.parse!(parser, @source)
+            release.source = @source
+          else
+            release = channel.releases.upload_file(permitted, parser: parser, source: @source)
+          end
           release.business_environment = business_environment
           Pundit.authorize(@user, release, :create?)
           release.file_sha256 = sha
+          release.uploaded_at = Time.current
           release.save!
-          result = Result.new(release: release, duplicate: false)
+          Rails.cache.delete("app_#{release.app.id}_recently_release")
+          result = Result.new(release: release, duplicate: false, overwritten: existing.present?)
         end
       end
       unless result.duplicate

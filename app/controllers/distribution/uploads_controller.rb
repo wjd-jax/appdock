@@ -21,13 +21,12 @@ module Distribution
         authorize App.new, :create?
       end
       sha = Digest::SHA256.file(file.path).hexdigest
-      duplicates = channel ? channel.releases.where.not(distribution_status: 'retired')
-                                    .where(file_sha256: sha, business_environment: business_environment)
-                                    .order(id: :desc).select(&:file?) : []
+      existing = UploadPackage.existing_release(channel, bundle_id: parser.bundle_id,
+                   version: parser.release_version, build: parser.build_version, environment: business_environment)
       render json: {name: parser.name, bundle_id: parser.bundle_id, version: (parser.respond_to?(:release_version) ? parser.release_version : nil),
-                    platform: parser.platform, size: file.size, sha256: sha,
+                    build: parser.build_version, platform: parser.platform, size: file.size, sha256: sha,
                     business_environment: business_environment,
-                    duplicate: duplicates.present?, existing_url: duplicates.first&.release_url}
+                    duplicate: existing.present?, existing_id: existing&.id, existing_url: existing&.release_url}
     rescue AppInfo::UnknownFormatError, ActionController::ParameterMissing => e
       render json: {error: '无法识别安装包，请选择有效的 IPA 或 APK'}, status: :unprocessable_entity
     ensure
@@ -38,10 +37,10 @@ module Distribution
       business_environment = params[:business_environment]
       sha = params[:sha256].to_s
       bundle_id = params[:bundle_id].to_s
-      platform = params[:platform].to_s
+      platform = params[:platform].to_s.downcase
       unless TeamRelease::BUSINESS_ENVIRONMENTS.key?(business_environment) &&
              sha.match?(/\A[0-9a-f]{64}\z/) && bundle_id.present? && bundle_id.bytesize <= 255 &&
-             %w[iOS Android].include?(platform)
+             %w[ios android].include?(platform)
         return render json: {error: '包信息或包环境无效，请重新选择安装包'}, status: :unprocessable_entity
       end
 
@@ -52,22 +51,21 @@ module Distribution
       else
         authorize App.new, :create?
       end
-      duplicates = channel ? channel.releases.where.not(distribution_status: 'retired')
-                                    .where(file_sha256: sha, business_environment: business_environment)
-                                    .order(id: :desc).select(&:file?) : []
-      render json: {business_environment: business_environment, duplicate: duplicates.present?}
+      existing = UploadPackage.existing_release(channel, bundle_id: bundle_id,
+                   version: params[:version], build: params[:build], environment: business_environment)
+      render json: {business_environment: business_environment, duplicate: existing.present?, existing_id: existing&.id}
     end
 
     def create
       result = UploadPackage.new(params, current_user, source: 'web').call
       downloads = AppDownloads.new(result.release.app)
-      render json: {id: result.release.id, duplicate: result.duplicate, release_url: result.release.release_url,
+      render json: {id: result.release.id, duplicate: result.duplicate, overwritten: result.overwritten, existing_id: result.release.id, release_url: result.release.release_url,
                     qrcode_url: result.release.qrcode_url, version: result.release.version,
                     business_environment: result.release.business_environment,
                     app_url: downloads.path,
                     package_url: downloads.package_path(result.release),
                     package_qrcode_url: downloads.package_qrcode_path(result.release),
-                    workspace_url: downloads.path}, status: result.duplicate ? :ok : :created
+                    workspace_url: downloads.path}, status: result.duplicate ? :conflict : :created
     rescue UploadPackage::InvalidPackage, ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e
       render json: {error: e.message}, status: :unprocessable_entity
     end

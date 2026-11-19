@@ -1,139 +1,92 @@
 <!doctype html>
+<html lang="zh-CN">
 <head>
-  <meta charset="utf-8"/>
-  <title>AppDock is starting</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>AppDock · 服务正在启动</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2215%22%20fill%3D%22%2335b3a7%22/%3E%3Crect%20x%3D%2219%22%20y%3D%2211%22%20width%3D%2220%22%20height%3D%2220%22%20rx%3D%225%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2237%22%20y%3D%2217%22%20width%3D%2210%22%20height%3D%2210%22%20rx%3D%223%22%20fill%3D%22%23fff%22%20opacity%3D%22.55%22/%3E%3Cpath%20d%3D%22M14%2036v9a7%207%200%200%200%207%207h22a7%207%200%200%200%207-7v-9%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20d%3D%22M29%2034v9m-5-5%205%205%205-5%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E">
   <style>
-    html {
-      height: 100%;
-      background: #3023ae;
-      background: -moz-linear-gradient(-45deg,  #3023ae 0%, #c86dd7 100%);
-      background: -webkit-gradient(linear, left top, right bottom, color-stop(0%,#3023ae), color-stop(100%,#c86dd7));
-      background: -webkit-linear-gradient(-45deg,  #3023ae 0%,#c86dd7 100%);
-      background: -o-linear-gradient(-45deg,  #3023ae 0%,#c86dd7 100%);
-      background: -ms-linear-gradient(-45deg,  #3023ae 0%,#c86dd7 100%);
-      background: linear-gradient(135deg,  #3023ae 0%,#c86dd7 100%);
-      background-attachment: fixed;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      color: white;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-    .message {
-      margin-top: 20px;
-      text-align: center;
-    }
-    .hidden {
-      display: none;
-    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #344844; background: #f6f6f6; font: 14px/1.6 "Helvetica Neue", Helvetica, Arial, "PingFang SC", sans-serif; }
+    main { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 28px 20px; }
+    .panel { width: 100%; max-width: 480px; text-align: center; }
+    .brand { display: inline-flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 600; }
+    .brand svg { width: 48px; height: 48px; }
+    .status { margin-top: 32px; padding: 32px 24px; border: 1px solid #e0e7e5; border-radius: 6px; background: white; }
+    .spinner { width: 26px; height: 26px; margin: 0 auto 20px; border: 3px solid #d9efec; border-top-color: #35b3a7; border-radius: 50%; animation: spin 1s linear infinite; }
+    h1 { margin: 0 0 12px; font-size: 20px; font-weight: 500; }
+    p { margin: 0; color: #677a74; }
+    .note { margin-top: 20px; font-size: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
   </style>
-  <script type="text/javascript">
-    const timeout = 5000; // 5 seconds
-    const duration = 2000; // 2 seconds
-    function checkHealth() {
-      fetch('/api/version', {
-        method: 'GET',
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache'
-        },
-        signal: AbortSignal.timeout(timeout)
-      })
-      .then(response => {
-        if (response.status === 200) {
-          window.location.reload();
-        }
-      })
-      .catch(error => {
-        console.log('Health check error:', error);
-      });
-    }
-
-    function setLanguage() {
-      const userLang = navigator.language || navigator.userLanguage;
-      console.log("Browser language:", userLang);
-      
-      // Define locales object
-      const locales = {
-        zh: {
-          title: "应用正在启动中...",
-          description: "系统正在检测应用状态，将在服务就绪后自动刷新"
-        },
-        en: {
-          title: "Application is starting...",
-          description: "The system is checking application status and will automatically refresh when ready"
-        }
-      };
-      
-      // Determine which locale to use
-      const isChinese = /^zh\b/.test(userLang);
-      const locale = isChinese ? locales.zh : locales.en;
-      
-      // Update content directly
-      document.getElementById('title').textContent = locale.title;
-      document.getElementById('description').textContent = locale.description;
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      setLanguage();
-      checkHealth();
-      setInterval(checkHealth, duration);
-    });
-  </script>
 </head>
 <body>
-<div class="container">
-  <!-- By Sam Herbert (@sherb), for everyone. More @ http://goo.gl/7AJzbL -->
-  <svg width="120" height="120" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg" stroke="#fff">
-    <g fill="none" fill-rule="evenodd" transform="translate(1 1)" stroke-width="2">
-        <circle cx="22" cy="22" r="6" stroke-opacity="0">
-            <animate attributeName="r"
-                 begin="1.5s" dur="3s"
-                 values="6;22"
-                 calcMode="linear"
-                 repeatCount="indefinite" />
-            <animate attributeName="stroke-opacity"
-                 begin="1.5s" dur="3s"
-                 values="1;0" calcMode="linear"
-                 repeatCount="indefinite" />
-            <animate attributeName="stroke-width"
-                 begin="1.5s" dur="3s"
-                 values="2;0" calcMode="linear"
-                 repeatCount="indefinite" />
-        </circle>
-        <circle cx="22" cy="22" r="6" stroke-opacity="0">
-            <animate attributeName="r"
-                 begin="3s" dur="3s"
-                 values="6;22"
-                 calcMode="linear"
-                 repeatCount="indefinite" />
-            <animate attributeName="stroke-opacity"
-                 begin="3s" dur="3s"
-                 values="1;0" calcMode="linear"
-                 repeatCount="indefinite" />
-            <animate attributeName="stroke-width"
-                 begin="3s" dur="3s"
-                 values="2;0" calcMode="linear"
-                 repeatCount="indefinite" />
-        </circle>
-        <circle cx="22" cy="22" r="8">
-            <animate attributeName="r"
-                 begin="0s" dur="1.5s"
-                 values="6;1;2;3;4;5;6"
-                 calcMode="linear"
-                 repeatCount="indefinite" />
-        </circle>
-    </g>
-  </svg>
-  <div class="message">
-    <h2 id="title"></h2>
-    <p id="description"></p>
-  </div>
-</div>
+  <main><div class="panel">
+    <div class="brand"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#35b3a7"/><rect x="19" y="11" width="20" height="20" rx="5" fill="#fff"/><rect x="37" y="17" width="10" height="10" rx="3" fill="#fff" opacity=".55"/><path d="M14 36v9a7 7 0 0 0 7 7h22a7 7 0 0 0 7-7v-9" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M29 34v9m-5-5 5 5 5-5" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>AppDock</span></div>
+    <section class="status" aria-live="polite" aria-atomic="true">
+      <div class="spinner" aria-hidden="true"></div>
+      <h1 id="title">服务正在启动</h1>
+      <p id="description">正在确认服务状态，就绪后将自动返回</p>
+    </section>
+    <p class="note" id="note">此页面会自动检测，无需反复刷新</p>
+  </div></main>
+  <script>
+    (() => {
+      const chinese = /^zh\b/i.test(navigator.language || 'zh');
+      const copy = chinese ? {
+        starting: '服务正在启动', waiting: '正在确认服务状态，就绪后将自动返回',
+        slow: '服务暂未就绪', help: '等待时间较长，可能正在重启或暂时不可用。我们会继续检测；若持续无法恢复，请联系管理员',
+        ready: '服务已就绪', returning: '正在返回，请稍候',
+        note: '此页面会自动检测，无需反复刷新'
+      } : {
+        starting: 'Service is starting', waiting: 'Checking service status. You will return automatically when it is ready.',
+        slow: 'Service is not ready yet', help: 'The service may be restarting or temporarily unavailable. Checks will continue. Contact your administrator if this persists.',
+        ready: 'Service is ready', returning: 'Returning, please wait',
+        note: 'Status checks run automatically. No need to refresh.'
+      };
+      document.documentElement.lang = chinese ? 'zh-CN' : 'en';
+      const title = document.getElementById('title');
+      const description = document.getElementById('description');
+      function display(heading, detail) {
+        title.textContent = heading;
+        description.textContent = detail;
+        document.title = 'AppDock · ' + heading;
+      }
+      display(copy.starting, copy.waiting);
+      document.getElementById('note').textContent = copy.note;
+      const started = Date.now();
+      let timer, checking = false;
+      async function checkHealth() {
+        if (checking) return;
+        checking = true;
+        clearTimeout(timer);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        let ready = false;
+        try {
+          const response = await fetch('/api/health', {
+            cache: 'no-store', headers: { Accept: 'text/plain' }, signal: controller.signal
+          });
+          ready = response.ok && (await response.text()).trim() === 'healthy';
+        } catch (_) {
+          // Temporary network and startup failures are retried below.
+        } finally {
+          clearTimeout(timeout);
+          checking = false;
+        }
+        if (ready) {
+          display(copy.ready, copy.returning);
+          if (location.pathname === '/loading.html') location.replace('/');
+          else location.reload();
+          return;
+        }
+        if (Date.now() - started >= 60000) display(copy.slow, copy.help);
+        timer = setTimeout(checkHealth, 2000);
+      }
+      checkHealth();
+    })();
+  </script>
 </body>
 </html>

@@ -6,10 +6,13 @@ module Distribution
     before_action :load_product_alias, only: %i[product_alias product_alias_qrcode package_alias package_alias_qrcode]
     before_action :load_package_alias, only: %i[package_alias package_alias_qrcode]
 
+    before_action :load_package_environment, only: %i[package package_qrcode package_alias package_alias_qrcode]
+
     def show
       releases = AppDownloads.new(@app).available
       @latest = releases.uniq { |release| [release.platform, release.bundle_id] }
       @environment_filter = history_environment_filter
+      @history_platform = %w[ios android].include?(params[:history_platform]) ? params[:history_platform] : 'all'
       @history = filter_history(releases).first(50)
       render 'distribution/public/app'
     end
@@ -27,31 +30,40 @@ module Distribution
     end
 
     def package
-      releases = AppDownloads.new(@app).package_releases(params[:platform], params[:bundle_id])
+      releases = AppDownloads.new(@app).package_releases(params[:platform], params[:bundle_id], environment: @package_environment)
       render_package(releases)
     end
 
     def package_qrcode
-      release = AppDownloads.new(@app).package_releases(params[:platform], params[:bundle_id]).first
+      release = AppDownloads.new(@app).package_releases(params[:platform], params[:bundle_id], environment: @package_environment).first
       return head :not_found unless release
 
-      render qrcode: AppDownloads.new(@app).package_url(release), **qrcode_options
+      render qrcode: AppDownloads.new(@app).package_url(release, environment: @package_environment), **qrcode_options
     end
 
     def package_alias
       release = package_alias_release
-      releases = release ? AppDownloads.new(@app).package_releases(release.platform, release.bundle_id) : []
+      releases = release ? AppDownloads.new(@app).package_releases(release.platform, release.bundle_id, environment: @package_environment) : []
       render_package(releases)
     end
 
     def package_alias_qrcode
       release = package_alias_release
-      return head :not_found unless release && AppDownloads.new(@app).package_releases(release.platform, release.bundle_id).any?
+      return head :not_found unless release && AppDownloads.new(@app).package_releases(release.platform, release.bundle_id, environment: @package_environment).any?
 
-      render qrcode: AppDownloads.new(@app).package_url(release), **qrcode_options
+      render qrcode: AppDownloads.new(@app).package_url(release, environment: @package_environment), **qrcode_options
     end
 
     private
+
+    def load_package_environment
+      value = params[:package_environment]
+      return if value.nil?
+      unless TeamRelease::BUSINESS_ENVIRONMENTS.key?(value)
+        return render 'distribution/public/unavailable', status: :not_found
+      end
+      @package_environment = value
+    end
 
     def load_app
       @app = App.find(params[:id])
@@ -88,7 +100,8 @@ module Distribution
       return render 'distribution/public/unavailable', status: :not_found if releases.empty?
 
       @latest = releases.first(1)
-      @environment_filter = history_environment_filter
+      @environment_filter = @package_environment || history_environment_filter
+      @history_platform = %w[ios android].include?(params[:history_platform]) ? params[:history_platform] : 'all'
       @history = filter_history(releases).first(50)
       @package_view = true
       render 'distribution/public/app'
@@ -100,9 +113,10 @@ module Distribution
     end
 
     def filter_history(releases)
-      return releases if @environment_filter == 'all'
-
-      releases.select { |release| release.business_environment_key == @environment_filter }
+      releases.select do |release|
+        (@environment_filter == 'all' || release.business_environment_key == @environment_filter) &&
+          (@history_platform == 'all' || release.platform.downcase == @history_platform)
+      end
     end
   end
 end

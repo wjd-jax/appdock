@@ -38,7 +38,7 @@ begin
   check('first package and summary links differ') { first['package_url'] != first['app_url'] }
   check('summary and package links use stable readable aliases') do
     URI(first['app_url']).path == "/#{first_app.distribution_slug}" &&
-      URI(first['package_url']).path == "/#{first_app.distribution_slug}/#{original.platform.downcase}/p#{original.channel_id}"
+      URI(first['package_url']).path == "/#{first_app.distribution_slug}/#{original.platform.downcase}/p#{original.channel_id}/testing"
   end
 
   current_bundle = second_bundle
@@ -50,8 +50,8 @@ begin
     alternate.channel_id != original.channel_id && second['package_url'] != first['package_url']
   end
   again = upload(session, name)
-  check('same package keeps its link and deduplicates') do
-    session.response.status == 200 && again['package_url'] == second['package_url'] && again['id'] == second['id']
+  check('same package reports a conflict and keeps its link') do
+    session.response.status == 409 && again['package_url'] == second['package_url'] && again['existing_id'] == second['id']
   end
 ensure
   AppInfo.define_singleton_method(:parse, real_parse)

@@ -30,6 +30,9 @@ class Release < ApplicationRecord
   before_save   :convert_custom_fields
   before_save   :strip_branch
 
+  before_destroy :clear_deleted_recommendation
+  after_destroy :clear_deleted_release_cache
+
   after_create  :retained_build_job
 
   delegate :scheme, to: :channel
@@ -67,6 +70,14 @@ class Release < ApplicationRecord
       ge_version(release.release_version, release_version) &&
         gt_version(release.build_version, build_version)
     }
+  end
+
+  def clear_deleted_recommendation
+    Channel.where(recommended_release_id: id).update_all(recommended_release_id: nil)
+  end
+
+  def clear_deleted_release_cache
+    Rails.cache.delete("app_#{app.id}_recently_release")
   end
 
   def app_name

@@ -1,16 +1,44 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title><%= content_for?(:title) ? "#{yield(:title)} · AppDock" : 'AppDock · 团队应用分发' %></title>
-<link rel="icon" href="/distribution/appdock-logo.svg" type="image/svg+xml"><meta name="referrer" content="<%= controller_path == 'distribution/udids' ? 'no-referrer' : 'same-origin' %>"><meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/distribution/appdock-octopus-20261117.svg" type="image/svg+xml"><link rel="apple-touch-icon" sizes="180x180" href="/distribution/appdock-octopus-touch-20261117.png"><meta name="referrer" content="<%= controller_path == 'distribution/udids' ? 'no-referrer' : 'same-origin' %>"><meta name="robots" content="noindex,nofollow">
 <%= csrf_meta_tags %>
-<link rel="stylesheet" href="/distribution/app.css?v=7"><script src="/distribution/app.js?v=12" defer></script>
+<link rel="stylesheet" href="/distribution/app.css?v=7"><script src="/distribution/app.js?v=19-success1" defer></script>
 </head><body>
-<header class="topbar"><a class="brand" href="/"><img class="brand-logo" src="/distribution/appdock-logo.svg" alt="">AppDock</a><nav>
+<header class="topbar"><a class="brand" href="/"><img class="brand-logo" src="/distribution/appdock-octopus-20261117.svg" alt="">AppDock</a><nav>
 <% if Distribution::PublicContext.external %><span class="badge">应用下载</span>
 <% elsif DistributionAccess.trusted_lan? %><%= link_to '应用分发', distribution_workspace_path, aria: { current: (%w[distribution/workspace distribution/apps distribution/uploads distribution/versions].include?(controller_path)) ? 'page' : nil } %><%= link_to '获取 UDID', distribution_udid_path, aria: { current: (controller_path == 'distribution/udids') ? 'page' : nil } %><%= link_to '上传通知', distribution_notifications_path, class: 'nav-secondary' %><%= link_to '开发接入', distribution_developer_path, class: 'nav-secondary', aria: { current: (controller_path == 'distribution/developers') ? 'page' : nil } %><%= link_to '访问设置', distribution_network_access_path, class: 'nav-secondary' %><%= link_to '运行状态', distribution_operations_path, class: 'nav-secondary', aria: { current: (controller_path == 'distribution/operations') ? 'page' : nil } %><span class="badge" title="当前使用内网共享访问身份">内网团队</span>
 <% elsif user_signed_in? %><%= link_to '应用分发', distribution_workspace_path, aria: { current: (%w[distribution/workspace distribution/apps distribution/uploads distribution/versions].include?(controller_path)) ? 'page' : nil } %><%= link_to '获取 UDID', distribution_udid_path, aria: { current: (controller_path == 'distribution/udids') ? 'page' : nil } %><% if current_user.admin? %><%= link_to '上传通知', distribution_notifications_path, class: 'nav-secondary' %><% end %><%= link_to '开发接入', distribution_developer_path, class: 'nav-secondary', aria: { current: (controller_path == 'distribution/developers') ? 'page' : nil } %><% if current_user.admin? %><%= link_to '访问设置', distribution_network_access_path, class: 'nav-secondary' %><%= link_to '运行状态', distribution_operations_path, class: 'nav-secondary', aria: { current: (controller_path == 'distribution/operations') ? 'page' : nil } %><% end %><span class="muted"><%= current_user.username %></span>
 <% else %><a class="muted" href="<%= new_user_session_path %>">开发者登录</a><% end %>
 </nav></header>
-<main class="shell"><% flash.each do |kind,message| %><div role="status" class="notice <%= kind %>"><%= message %></div><% end %><%= yield %><link rel="stylesheet" href="/distribution/fir.css?v=9"></main>
-<div id="toast" role="status" aria-live="polite"></div><footer class="footer">团队应用分发 · 请使用与当前设备匹配的安装包</footer>
+<main class="shell"><% flash.each do |kind,message| %><% next if kind.to_s == 'toast' %><div role="status" class="notice <%= kind %>"><%= message %></div><% end %><%= yield %><link rel="stylesheet" href="/distribution/fir.css?v=11"></main>
+<div id="toast" data-message="<%= flash[:toast] %>" role="status" aria-live="polite"></div><footer class="footer">团队应用分发 · 请使用与当前设备匹配的安装包</footer>
+<% if controller_path == 'distribution/apps' %>
+<dialog id="notes-dialog" class="notes-dialog" aria-labelledby="notes-dialog-title">
+  <div class="notes-dialog-surface">
+    <button class="delete-dialog-close" type="button" aria-label="关闭更新日志编辑" data-notes-cancel>×</button>
+    <p class="delete-dialog-eyebrow">版本信息</p>
+    <h2 id="notes-dialog-title">编辑更新日志</h2>
+    <p class="notes-dialog-version" data-notes-version></p>
+    <%= form_tag '#', method: :patch, id: 'notes-edit-form' do %>
+      <%= hidden_field_tag :return_to, '' %>
+      <label for="notes-editor">更新内容 <span>选填</span></label>
+      <textarea id="notes-editor" name="changelog" rows="8" placeholder="填写本次版本的更新内容…"></textarea>
+      <p class="notes-editor-hint">保存后将同步展示在此版本的下载页面。</p>
+      <div class="delete-dialog-actions"><button class="delete-cancel" type="button" data-notes-cancel>取消</button><button class="notes-save" type="submit">保存更新日志</button></div>
+    <% end %>
+  </div>
+</dialog>
+<dialog id="delete-dialog" class="delete-dialog" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-impact">
+  <div class="delete-dialog-surface">
+    <button class="delete-dialog-close" type="button" aria-label="关闭删除确认" data-delete-cancel>×</button>
+    <div class="delete-dialog-icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/></svg></div>
+    <p class="delete-dialog-eyebrow">删除确认</p>
+    <h2 id="delete-dialog-title">确认删除？</h2>
+    <p class="delete-dialog-subject" data-delete-subject></p>
+    <div class="delete-dialog-warning"><span class="delete-dialog-warning-title">此操作无法撤销</span><p id="delete-dialog-impact" data-delete-impact></p></div>
+    <div class="delete-dialog-actions"><button type="button" class="delete-cancel" data-delete-cancel autofocus>取消</button><button type="button" class="delete-proceed" data-delete-proceed>确认删除</button></div>
+  </div>
+</dialog>
+<% end %>
 </body></html>

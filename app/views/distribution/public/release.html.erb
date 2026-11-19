@@ -18,7 +18,7 @@
       <section class="release-summary" aria-label="版本信息">
         <p class="release-section-label">版本信息</p>
         <p class="release-version-number"><%= @release.release_version.presence || @release.version %><small>Build <%= @release.build_version.presence || '—' %></small></p>
-        <p class="release-meta"><%= number_to_human_size(@release.size || 0) %> · 更新于 <%= distribution_time(@release.created_at) %></p>
+        <p class="release-meta"><%= number_to_human_size(@release.size || 0) %> · 更新于 <%= distribution_time(@release.distribution_uploaded_at) %></p>
       </section>
 
       <% unless logged_in_or_without_auth?(@release) %>

@@ -3,12 +3,17 @@ module TeamRelease
   STATUSES = {'testing' => '待测试', 'approved' => '测试通过', 'retired' => '已停用'}.freeze
   BUSINESS_ENVIRONMENTS = {'testing' => '测试环境', 'production' => '正式环境'}.freeze
   included do
+    scope :recently_uploaded, -> { reorder(Arel.sql('COALESCE(releases.uploaded_at, releases.created_at) DESC, releases.id DESC')) }
     validates :distribution_status, inclusion: { in: STATUSES.keys }
     validates :business_environment, inclusion: { in: BUSINESS_ENVIRONMENTS.keys }
     validates :issue_url, format: { with: /\Ahttps?:\/\/[^\s]+\z/ }, allow_blank: true
     before_validation :default_business_environment, on: :create
     before_validation :compute_distribution_hash
     after_save :clear_retired_recommendation
+  end
+
+  def distribution_uploaded_at
+    uploaded_at || created_at
   end
 
   def distribution_label

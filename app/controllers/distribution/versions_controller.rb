@@ -25,6 +25,23 @@ module Distribution
       redirect_back fallback_location: distribution_workspace_path, alert: e.message
     end
 
+    def destroy
+      release = Release.find(params[:id])
+      authorize release, :destroy?
+      app = release.app
+      platform, bundle_id = release.platform, release.bundle_id
+      release.destroy!
+      remaining = Release.where(channel_id: app.channel_ids, bundle_id: bundle_id).any? { |item| item.platform == platform }
+      destination = if params[:return_to] == 'package' && remaining
+                      distribution_manage_package_path(app, platform, bundle_id)
+                    else
+                      distribution_manage_app_path(app)
+                    end
+      redirect_to destination, flash: { toast: '此历史版本已删除' }, status: :see_other
+    rescue ActiveRecord::RecordNotDestroyed => e
+      redirect_back fallback_location: distribution_workspace_path, alert: e.message, status: :see_other
+    end
+
     def share
       return head :not_found if trusted_lan?
       release = Release.find(params[:id])

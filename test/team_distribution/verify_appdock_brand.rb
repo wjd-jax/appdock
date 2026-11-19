@@ -32,10 +32,9 @@ session.https!
     session.response.status == 200 && Nokogiri::HTML(session.response.body).title.include?('AppDock')
   end
 end
-release = Release.where(distribution_status: 'testing').first || Release.first
-raise 'Need isolated APK fixture' unless release
-release.update!(distribution_status: 'testing')
-release.app.update!(archived: false)
+release = Release.joins(channel: {scheme: :app}).merge(App.active)
+                 .where(distribution_status: 'testing').recently_uploaded.detect { |item| item.android? && item.file? }
+raise 'Need an active isolated APK fixture' unless release
 session.get URI(release.download_url).request_uri
 session.follow_redirect! if session.response.redirect?
 check('APK download preserves SHA-256') do
